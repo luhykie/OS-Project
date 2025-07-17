@@ -22,3 +22,5 @@ class Process:
         self.response = -1 # Response Time = First Run - Arrival
         self.start = -1 # First Run
         self.queue_level = 0  # For MLFQ
+
+    sample
