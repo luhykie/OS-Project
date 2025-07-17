@@ -1,2 +1,1 @@
-print("Hello World")
-print("hi dae")
+import tkinter as tk
