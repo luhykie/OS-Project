@@ -11,3 +11,14 @@ import time
 class Process:
     # Represents a process in the scheduler
     def __init__(self, pid, arrival, burst, priority=0):
+                self.pid = pid # Process ID
+        self.arrival = arrival # Arrival Time 
+        self.burst = burst # Total Execution Time
+        self.priority = priority # Priority Value
+        self.remaining = burst # Remaining Time Left to Execute (preemptive)
+        self.completion = 0 # Time pf which Process Completes
+        self.turnaround = 0 # Turnaround Time = Completion - Arrival
+        self.waiting = 0 # Waiting Time = Turnaround - Burst
+        self.response = -1 # Response Time = First Run - Arrival
+        self.start = -1 # First Run
+        self.queue_level = 0  # For MLFQ
