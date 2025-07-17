@@ -11,7 +11,7 @@ import time
 class Process:
     # Represents a process in the scheduler
     def __init__(self, pid, arrival, burst, priority=0):
-                self.pid = pid # Process ID
+        self.pid = pid # Process ID
         self.arrival = arrival # Arrival Time 
         self.burst = burst # Total Execution Time
         self.priority = priority # Priority Value
