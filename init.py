@@ -7,3 +7,7 @@ import time
 # -----------------------------
 # Data Structures and Utilities
 # -----------------------------
+
+class Process:
+    # Represents a process in the scheduler
+    def __init__(self, pid, arrival, burst, priority=0):
