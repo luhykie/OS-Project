@@ -7,3 +7,6 @@ import time
 # -----------------------------
 # Data Structures and Utilities
 # -----------------------------
+
+class Process:
+    # Represents a process in the scheduler
