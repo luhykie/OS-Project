@@ -23,4 +23,14 @@ class Process:
         self.start = -1 # First Run
         self.queue_level = 0  # For MLFQ
 
-    sample
+    def as_dict(self):
+        return {
+            'PID': self.pid,
+            'Arrival': self.arrival,
+            'Burst': self.burst,
+            'Priority': self.priority,
+            'Completion': self.completion,
+            'Turnaround': self.turnaround,
+            'Waiting': self.waiting,
+            'Response': self.response,
+        }
