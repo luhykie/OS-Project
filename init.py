@@ -3,3 +3,7 @@ from tkinter import ttk, messagebox
 import random
 import threading
 import time
+
+# -----------------------------
+# Data Structures and Utilities
+# -----------------------------
