@@ -284,7 +284,7 @@ class CPUSchedulerGUI:
     def _build_gui(self):
         # Build all GUI components and layout
         # Top bar
-        tk.Label(self.root, text="☆彡 Developed by: LKYA ENTERA & KEA ABAQUITA ミ★", bg="#FF1493", fg="white", anchor="w", font=("Arial", 10, "bold")).place(x=0, y=0, relwidth=1, height=25)
+        tk.Label(self.root, text="☆彡 Developed by: LYKA ENTERA & KEA ABAQUITA ミ★", bg="#FF1493", fg="white", anchor="w", font=("Arial", 10, "bold")).place(x=0, y=0, relwidth=1, height=25)
 
         # Process input frame
         frame = tk.Frame(self.root, bg="#1A1A1A", highlightbackground="#FF1493", highlightthickness=2)
