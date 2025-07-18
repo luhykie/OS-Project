@@ -256,3 +256,30 @@ def mlfq(processes, quanta, allotments):
                 time = next_arrival
                 last_pid = None
     return procs, gantt
+
+# -----------------------------
+# GUI Application
+# -----------------------------
+class CPUSchedulerGUI:
+    # Main GUI application for CPU scheduling visualization
+    def __init__(self, root):
+        # Initialize the GUI and variables
+        self.root = root  # Store the root window
+        self.root.title("CPU Scheduling Visualization")  # Set window title
+        self.root.configure(bg="#18120f")  # Set background color
+        self.root.geometry("1100x700")  # Set window size
+        self.root.resizable(False, False)  # Disable window resizing
+
+        # Initialize variables
+        self.processes = []  # List to hold Process objects
+        self.selected_algorithm = tk.StringVar()  # Selected algorithm dropdown
+        self.quantum = tk.IntVar(value=1)  # Time quantum for Round Robin
+        self.sim_speed = tk.DoubleVar(value=0.1)  # Speed of simulation (delay between steps)
+        self.mlfq_quanta = [tk.IntVar(value=2) for _ in range(4)]  # Quanta for each MLFQ level
+        self.mlfq_allot = [tk.IntVar(value=4) for _ in range(4)]  # Allotment times for MLFQ levels
+        self.action_msg = tk.StringVar()  # Status/action message for feedback
+        self.gantt_data = []  # Stores tuples of (label, duration) for Gantt chart
+        self.sim_thread = None  # Thread used to run simulation
+        self.sim_running = False  # Flag to indicate if simulation is active
+
+        self._build_gui()  # Build GUI widgets
