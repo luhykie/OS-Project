@@ -405,3 +405,12 @@ class CPUSchedulerGUI:
         tk.Label(self.root, textvariable=self.avg_waiting, bg="#18120f", fg="white", font=("Segoe UI", 10)).place(x=570, y=590, width=170, height=25)
         tk.Label(self.root, textvariable=self.avg_turnaround, bg="#18120f", fg="white", font=("Segoe UI", 10)).place(x=740, y=590, width=170, height=25)
         tk.Label(self.root, textvariable=self.avg_response, bg="#18120f", fg="white", font=("Segoe UI", 10)).place(x=910, y=590, width=170, height=25)
+
+# -----------------------------
+# Main
+# -----------------------------
+if __name__ == "__main__":
+    # Entry point: start the GUI application
+    root = tk.Tk()
+    app = CPUSchedulerGUI(root)
+    root.mainloop()
