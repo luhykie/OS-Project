@@ -184,3 +184,75 @@ def round_robin(processes, quantum):
                 time = next_arrival
                 last_pid = None
     return procs, gantt
+
+def mlfq(processes, quanta, allotments):
+    # Multilevel Feedback Queue scheduling with 4 queues
+    # 4 queues: Q0 (highest) to Q3 (lowest)
+    procs = [Process(p.pid, p.arrival, p.burst, p.priority) for p in processes]
+    n = len(procs)
+    time = 0
+    completed = 0
+    queues = [[] for _ in range(4)]
+    idx = 0
+    gantt = []
+    last_pid = None
+    in_queue = set()
+    # For each process, track time spent at each level
+    level_time = {p.pid: [0, 0, 0, 0] for p in procs}
+    while completed < n:
+        while idx < n and procs[idx].arrival <= time:
+            queues[0].append(procs[idx])
+            in_queue.add(procs[idx].pid)
+            procs[idx].queue_level = 0
+            idx += 1
+        # Find the highest non-empty queue
+        qidx = next((i for i, q in enumerate(queues) if q), None)
+        if qidx is not None:
+            p = queues[qidx].pop(0)
+            in_queue.remove(p.pid)
+            quantum = quanta[qidx]
+            allot = allotments[qidx]
+            run_time = min(quantum, p.remaining, allot - level_time[p.pid][qidx])
+            if p.start == -1:
+                p.start = time
+                p.response = time - p.arrival
+            if last_pid != (p.pid, qidx):
+                gantt.append((f"{p.pid}(Q{qidx})", run_time))
+            else:
+                gantt[-1] = (gantt[-1][0], gantt[-1][1] + run_time)
+            time += run_time
+            p.remaining -= run_time
+            level_time[p.pid][qidx] += run_time
+            # Add new arrivals during this run
+            while idx < n and procs[idx].arrival <= time:
+                queues[0].append(procs[idx])
+                in_queue.add(procs[idx].pid)
+                procs[idx].queue_level = 0
+                idx += 1
+            if p.remaining == 0:
+                p.completion = time
+                p.turnaround = p.completion - p.arrival
+                p.waiting = p.turnaround - p.burst
+                completed += 1
+            elif level_time[p.pid][qidx] >= allot:
+                # Demote to next queue
+                if qidx < 3:
+                    p.queue_level = qidx + 1
+                    queues[qidx + 1].append(p)
+                    in_queue.add(p.pid)
+                else:
+                    queues[qidx].append(p)
+                    in_queue.add(p.pid)
+                level_time[p.pid][qidx] = 0
+            else:
+                queues[qidx].append(p)
+                in_queue.add(p.pid)
+            last_pid = (p.pid, qidx)
+        else:
+            if idx < n:
+                next_arrival = procs[idx].arrival
+                idle_time = next_arrival - time
+                gantt.append(('IDLE', idle_time))
+                time = next_arrival
+                last_pid = None
+    return procs, gantt
