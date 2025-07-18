@@ -309,29 +309,29 @@ class CPUSchedulerGUI:
         tk.Button(frame, text="Clear All", command=self.clear_processes, width=10, bg="#fc6ec8", fg="#ff009d").place(x=140, y=70)
 
         # Process table
-        self.table = ttk.Treeview(self.root, columns=("PID", "Arrival", "Burst", "Priority"), show="headings", height=5)
+        self.table = ttk.Treeview(self.root, columns=("PID", "Arrival", "Burst", "Priority"), show="headings", height=5, style="Treeview")
         self.table.place(x=10, y=160, width=540, height=120)
         for col in ("PID", "Arrival", "Burst", "Priority"):
             self.table.heading(col, text=col)
             self.table.column(col, width=120, anchor="center")
         style = ttk.Style()
-        style.configure("Treeview", background="#18120f", fieldbackground="#18120f", foreground="#ff009d", rowheight=24)
+        style.configure("Treeview", background="#ff009d", fieldbackground="#18120f", foreground="black", rowheight=24)
         style.map('Treeview', background=[('selected', '#fc6ec8')])
 
         # Algorithm selection
         algo_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#fc6ec8", highlightthickness=2)
         algo_frame.place(x=10, y=290, width=540, height=70)
-        tk.Label(algo_frame, text="Algorithm", bg="#18120f", fg="#ff009d").place(x=10, y=5)
+        tk.Label(algo_frame, text="Algorithm", bg="#ff009d", fg="black").place(x=10, y=5)
         algo_menu = ttk.Combobox(algo_frame, textvariable=self.selected_algorithm, values=["FCFS", "SJF", "SRTF", "Round Robin", "MLFQ"], state="readonly", width=15)
         algo_menu.place(x=10, y=30)
         algo_menu.current(0)
-        tk.Label(algo_frame, text="Time Quantum (RR)", bg="#18120f", fg="#ff009d").place(x=180, y=5)
-        tk.Scale(algo_frame, from_=1, to=10, orient=tk.HORIZONTAL, variable=self.quantum, length=120, bg="#18120f", fg="#ff009d", highlightthickness=0).place(x=180, y=30)
+        tk.Label(algo_frame, text="Time Quantum (RR)", bg="#ff009d", fg="black").place(x=180, y=5)
+        tk.Scale(algo_frame, from_=1, to=10, orient=tk.HORIZONTAL, variable=self.quantum, length=120, bg="#ff009d", fg="black", highlightthickness=0).place(x=180, y=30)
         # MLFQ settings
-        tk.Label(algo_frame, text="MLFQ Quanta", bg="#18120f", fg="#ff009d").place(x=320, y=5)
+        tk.Label(algo_frame, text="MLFQ Quanta", bg="#ff009d", fg="black").place(x=320, y=5)
         for i in range(4):
             tk.Entry(algo_frame, textvariable=self.mlfq_quanta[i], width=2).place(x=320+40*i, y=30, width=30)
-        tk.Label(algo_frame, text="Allot", bg="#18120f", fg="#ff009d").place(x=480, y=5)
+        tk.Label(algo_frame, text="Allot", bg="#ff009d", fg="black").place(x=480, y=5)
         for i in range(4):
             tk.Entry(algo_frame, textvariable=self.mlfq_allot[i], width=2).place(x=480+40*i, y=30, width=30)
 
@@ -350,6 +350,7 @@ class CPUSchedulerGUI:
         tk.Label(self.root, text="Gantt Chart (Each box represents a second)", bg="#18120f", fg="#ff009d").place(x=10, y=480)
         self.gantt_canvas = tk.Canvas(self.root, bg="#18120f", highlightbackground="#fc6ec8", height=40, width=1060)
         self.gantt_canvas.place(x=10, y=510)
+        canvas.create_text(x, y, text="P1", fill="pink")
 
         # Metrics and status
         metrics_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#fc6ec8", highlightthickness=2)
