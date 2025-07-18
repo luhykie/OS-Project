@@ -287,10 +287,10 @@ class CPUSchedulerGUI:
     def _build_gui(self):
         # Build all GUI components and layout
         # Top bar
-        tk.Label(self.root, text="Developed by : LYKA ENTERA & KEA ABAQUITA", bg="#a05a1c", fg="white", anchor="w", font=("Segoe UI", 10, "bold")).place(x=0, y=0, relwidth=1, height=25)
+        tk.Label(self.root, text="Developed by : LYKA ENTERA & KEA ABAQUITA", bg="#fc6ec8", fg="white", anchor="w", font=("Segoe UI", 10, "bold")).place(x=0, y=0, relwidth=1, height=25)
 
         # Process input frame
-        frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#a05a1c", highlightthickness=2)
+        frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#fc6ec8", highlightthickness=2)
         frame.place(x=10, y=35, width=540, height=120)
         tk.Label(frame, text="Process", bg="#18120f", fg="white").place(x=10, y=5)
         tk.Label(frame, text="Arrival Time", bg="#18120f", fg="white").place(x=120, y=5)
@@ -304,9 +304,9 @@ class CPUSchedulerGUI:
         self.burst_entry.place(x=220, y=30)
         self.priority_entry = tk.Entry(frame, width=5)
         self.priority_entry.place(x=320, y=30)
-        tk.Button(frame, text="Add", command=self.add_process, width=6, bg="#a05a1c", fg="white").place(x=400, y=28)
-        tk.Button(frame, text="Generate Random", command=self.generate_random, width=15, bg="#a05a1c", fg="white").place(x=10, y=70)
-        tk.Button(frame, text="Clear All", command=self.clear_processes, width=10, bg="#a05a1c", fg="white").place(x=140, y=70)
+        tk.Button(frame, text="Add", command=self.add_process, width=6, bg="#fc6ec8", fg="white").place(x=400, y=28)
+        tk.Button(frame, text="Generate Random", command=self.generate_random, width=15, bg="#fc6ec8", fg="white").place(x=10, y=70)
+        tk.Button(frame, text="Clear All", command=self.clear_processes, width=10, bg="#fc6ec8", fg="white").place(x=140, y=70)
 
         # Process table
         self.table = ttk.Treeview(self.root, columns=("PID", "Arrival", "Burst", "Priority"), show="headings", height=5)
@@ -316,10 +316,10 @@ class CPUSchedulerGUI:
             self.table.column(col, width=120, anchor="center")
         style = ttk.Style()
         style.configure("Treeview", background="#18120f", fieldbackground="#18120f", foreground="white", rowheight=24)
-        style.map('Treeview', background=[('selected', '#a05a1c')])
+        style.map('Treeview', background=[('selected', '#fc6ec8')])
 
         # Algorithm selection
-        algo_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#a05a1c", highlightthickness=2)
+        algo_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#fc6ec8", highlightthickness=2)
         algo_frame.place(x=10, y=290, width=540, height=70)
         tk.Label(algo_frame, text="Algorithm", bg="#18120f", fg="white").place(x=10, y=5)
         algo_menu = ttk.Combobox(algo_frame, textvariable=self.selected_algorithm, values=["FCFS", "SJF", "SRTF", "Round Robin", "MLFQ"], state="readonly", width=15)
@@ -339,20 +339,20 @@ class CPUSchedulerGUI:
         tk.Label(self.root, textvariable=self.action_msg, bg="#18120f", fg="red", font=("Segoe UI", 10, "bold")).place(x=10, y=365, width=540, height=25)
 
         # Simulation controls
-        sim_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#a05a1c", highlightthickness=2)
+        sim_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#fc6ec8", highlightthickness=2)
         sim_frame.place(x=10, y=400, width=540, height=70)
         tk.Label(sim_frame, text="Simulation Speed", bg="#18120f", fg="white").place(x=10, y=5)
         tk.Scale(sim_frame, from_=0.05, to=1.0, resolution=0.05, orient=tk.HORIZONTAL, variable=self.sim_speed, length=200, bg="#18120f", fg="white", highlightthickness=0).place(x=10, y=30)
-        tk.Button(sim_frame, text="Simulate", command=self.start_simulation, width=10, bg="#a05a1c", fg="white").place(x=250, y=20)
-        tk.Button(sim_frame, text="Reset All", command=self.reset_all, width=10, bg="#a05a1c", fg="white").place(x=370, y=20)
+        tk.Button(sim_frame, text="Simulate", command=self.start_simulation, width=10, bg="#fc6ec8", fg="white").place(x=250, y=20)
+        tk.Button(sim_frame, text="Reset All", command=self.reset_all, width=10, bg="#fc6ec8", fg="white").place(x=370, y=20)
 
         # Gantt chart
         tk.Label(self.root, text="Gantt Chart (Each box represents a second)", bg="#18120f", fg="white").place(x=10, y=480)
-        self.gantt_canvas = tk.Canvas(self.root, bg="#18120f", highlightbackground="#a05a1c", height=40, width=1060)
+        self.gantt_canvas = tk.Canvas(self.root, bg="#18120f", highlightbackground="#fc6ec8", height=40, width=1060)
         self.gantt_canvas.place(x=10, y=510)
 
         # Metrics and status
-        metrics_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#a05a1c", highlightthickness=2)
+        metrics_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#fc6ec8", highlightthickness=2)
         metrics_frame.place(x=570, y=35, width=520, height=540)
         tk.Label(metrics_frame, text="Process", bg="#18120f", fg="white").place(x=10, y=5)
         tk.Label(metrics_frame, text="Status", bg="#18120f", fg="white").place(x=100, y=5)
@@ -464,7 +464,7 @@ class CPUSchedulerGUI:
         y = 10
         h = 20
         for label, dur in self.gantt_data:
-            color = "#a05a1c" if label != "IDLE" else "#333"
+            color = "#fc6ec8" if label != "IDLE" else "#333"
             self.gantt_canvas.create_rectangle(x, y, x+dur*25, y+h, fill=color, outline="white")
             self.gantt_canvas.create_text(x+dur*12, y+h//2, text=str(label), fill="white")
             x += dur*25
