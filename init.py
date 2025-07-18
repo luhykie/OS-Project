@@ -304,9 +304,9 @@ class CPUSchedulerGUI:
         self.burst_entry.place(x=220, y=30)
         self.priority_entry = tk.Entry(frame, width=5)
         self.priority_entry.place(x=320, y=30)
-        tk.Button(frame, text="Add", command=self.add_process, width=6, bg="#fc6ec8", fg="white").place(x=400, y=28)
-        tk.Button(frame, text="Generate Random", command=self.generate_random, width=15, bg="#fc6ec8", fg="white").place(x=10, y=70)
-        tk.Button(frame, text="Clear All", command=self.clear_processes, width=10, bg="#fc6ec8", fg="white").place(x=140, y=70)
+        tk.Button(frame, text="Add", command=self.add_process, width=6, bg="#fc6ec8", fg="#f5d3e8").place(x=400, y=28)
+        tk.Button(frame, text="Generate Random", command=self.generate_random, width=15, bg="#fc6ec8", fg="#f5d3e8").place(x=10, y=70)
+        tk.Button(frame, text="Clear All", command=self.clear_processes, width=10, bg="#fc6ec8", fg="#f5d3e8").place(x=140, y=70)
 
         # Process table
         self.table = ttk.Treeview(self.root, columns=("PID", "Arrival", "Burst", "Priority"), show="headings", height=5)
@@ -315,7 +315,7 @@ class CPUSchedulerGUI:
             self.table.heading(col, text=col)
             self.table.column(col, width=120, anchor="center")
         style = ttk.Style()
-        style.configure("Treeview", background="#18120f", fieldbackground="#18120f", foreground="white", rowheight=24)
+        style.configure("Treeview", background="#18120f", fieldbackground="#18120f", foreground="#fc3fb4", rowheight=24)
         style.map('Treeview', background=[('selected', '#fc6ec8')])
 
         # Algorithm selection
