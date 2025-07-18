@@ -266,7 +266,7 @@ class CPUSchedulerGUI:
         # Initialize the GUI and variables
         self.root = root  # Store the root window
         self.root.title("CPU Scheduling Visualization")  # Set window title
-        self.root.configure(bg="#18120f")  # Set background color
+        self.root.configure(bg="#ff0088")  # Set background color
         self.root.geometry("1100x700")  # Set window size
         self.root.resizable(False, False)  # Disable window resizing
 
