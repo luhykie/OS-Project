@@ -506,6 +506,15 @@ class CPUSchedulerGUI:
         self.avg_response.set("")
         self.action_msg.set("")
 
+# Validate inputs
+if arrival < 0 or burst <= 0:
+    self.action_msg.set("Arrival must be ≥ 0 and Burst time > 0.")
+    return
+
+if priority < 0:
+    self.action_msg.set("Priority must be a non-negative integer.")
+    return
+
 # -----------------------------
 # Main
 # -----------------------------
