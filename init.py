@@ -266,7 +266,7 @@ class CPUSchedulerGUI:
         # Initialize the GUI and variables
         self.root = root  # Store the root window
         self.root.title("CPU Scheduling Visualization")  # Set window title
-        self.root.configure(bg="#ff0088")  # Set background color
+        self.root.configure(bg="#180f12")  # Set background color
         self.root.geometry("1100x700")  # Set window size
         self.root.resizable(False, False)  # Disable window resizing
 
@@ -298,7 +298,7 @@ class CPUSchedulerGUI:
         tk.Label(frame, text="Priority", bg="#18120f", fg="#f5d3e8").place(x=320, y=5)
         self.pid_entry = ttk.Combobox(frame, values=[f"P{i+1}" for i in range(20)], width=5)
         self.pid_entry.place(x=10, y=30)
-        self.arrival_entry = tk.Entry(frame, width=8)
+        self.arrival_entry = tk.Entry(frame, width=8, bg="black", fg="#fc6ec8", insertbackground="#ff009d")
         self.arrival_entry.place(x=120, y=30)
         self.burst_entry = tk.Entry(frame, width=8)
         self.burst_entry.place(x=220, y=30)
