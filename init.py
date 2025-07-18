@@ -90,3 +90,97 @@ def sjf(processes):
                 gantt.append(('IDLE', next_arrival - time))
                 time = next_arrival
     return procs, gantt
+
+def srtf(processes):
+    # Shortest Remaining Time First (preemptive SJF) scheduling
+    procs = [Process(p.pid, p.arrival, p.burst, p.priority) for p in processes]
+    n = len(procs)
+    time = 0
+    completed = 0
+    gantt = []
+    ready = []
+    idx = 0
+    last_pid = None
+    while completed < n:
+        while idx < n and procs[idx].arrival <= time:
+            ready.append(procs[idx])
+            idx += 1
+        ready = [p for p in ready if p.remaining > 0]
+        if ready:
+            ready.sort(key=lambda p: (p.remaining, p.arrival, p.pid))
+            p = ready[0]
+            if p.start == -1:
+                p.start = time
+                p.response = time - p.arrival
+            if last_pid != p.pid:
+                gantt.append((p.pid, 1))
+            else:
+                gantt[-1] = (p.pid, gantt[-1][1] + 1)
+            p.remaining -= 1
+            time += 1
+            if p.remaining == 0:
+                p.completion = time
+                p.turnaround = p.completion - p.arrival
+                p.waiting = p.turnaround - p.burst
+                completed += 1
+            last_pid = p.pid
+        else:
+            if idx < n:
+                next_arrival = procs[idx].arrival
+                idle_time = next_arrival - time
+                gantt.append(('IDLE', idle_time))
+                time = next_arrival
+                last_pid = None
+    return procs, gantt
+
+def round_robin(processes, quantum):
+    # Round Robin scheduling with given time quantum
+    procs = [Process(p.pid, p.arrival, p.burst, p.priority) for p in processes]
+    n = len(procs)
+    time = 0
+    completed = 0
+    queue = []
+    idx = 0
+    gantt = []
+    last_pid = None
+    in_queue = set()
+    while completed < n:
+        while idx < n and procs[idx].arrival <= time:
+            queue.append(procs[idx])
+            in_queue.add(procs[idx].pid)
+            idx += 1
+        if queue:
+            p = queue.pop(0)
+            in_queue.remove(p.pid)
+            if p.start == -1:
+                p.start = time
+                p.response = time - p.arrival
+            run_time = min(quantum, p.remaining)
+            if last_pid != p.pid:
+                gantt.append((p.pid, run_time))
+            else:
+                gantt[-1] = (p.pid, gantt[-1][1] + run_time)
+            time += run_time
+            p.remaining -= run_time
+            while idx < n and procs[idx].arrival <= time:
+                if procs[idx].pid not in in_queue and procs[idx].remaining > 0:
+                    queue.append(procs[idx])
+                    in_queue.add(procs[idx].pid)
+                idx += 1
+            if p.remaining > 0:
+                queue.append(p)
+                in_queue.add(p.pid)
+            else:
+                p.completion = time
+                p.turnaround = p.completion - p.arrival
+                p.waiting = p.turnaround - p.burst
+                completed += 1
+            last_pid = p.pid
+        else:
+            if idx < n:
+                next_arrival = procs[idx].arrival
+                idle_time = next_arrival - time
+                gantt.append(('IDLE', idle_time))
+                time = next_arrival
+                last_pid = None
+    return procs, gantt
