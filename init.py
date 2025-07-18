@@ -287,7 +287,7 @@ class CPUSchedulerGUI:
     def _build_gui(self):
         # Build all GUI components and layout
         # Top bar
-        tk.Label(self.root, text="Developed by : LYKA ENTERA & KEA ABAQUITA", bg="#fc6ec8", fg="white", anchor="w", font=("Segoe UI", 10, "bold")).place(x=0, y=0, relwidth=1, height=25)
+        tk.Label(self.root, text="Developed by : LYKA ENTERA & KEA ABAQUITA", bg="#fc6ec8", fg="#f5d3e8", anchor="w", font=("Segoe UI", 10, "bold")).place(x=0, y=0, relwidth=1, height=25)
 
         # Process input frame
         frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#fc6ec8", highlightthickness=2)
@@ -465,8 +465,8 @@ class CPUSchedulerGUI:
         h = 20
         for label, dur in self.gantt_data:
             color = "#fc6ec8" if label != "IDLE" else "#333"
-            self.gantt_canvas.create_rectangle(x, y, x+dur*25, y+h, fill=color, outline="white")
-            self.gantt_canvas.create_text(x+dur*12, y+h//2, text=str(label), fill="white")
+            self.gantt_canvas.create_rectangle(x, y, x+dur*25, y+h, fill=color, outline="#ffceec")
+            self.gantt_canvas.create_text(x+dur*12, y+h//2, text=str(label), fill="#ffceec")
             x += dur*25
 
     def update_status(self, procs):
