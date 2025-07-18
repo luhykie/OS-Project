@@ -350,7 +350,6 @@ class CPUSchedulerGUI:
         tk.Label(self.root, text="Gantt Chart (Each box represents a second)", bg="#18120f", fg="#ff009d").place(x=10, y=480)
         self.gantt_canvas = tk.Canvas(self.root, bg="#18120f", highlightbackground="#fc6ec8", height=40, width=1060)
         self.gantt_canvas.place(x=10, y=510)
-        canvas.create_text(x, y, text="P1", fill="pink")
 
         # Metrics and status
         metrics_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#fc6ec8", highlightthickness=2)
