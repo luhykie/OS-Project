@@ -286,99 +286,72 @@ class CPUSchedulerGUI:
 
     def _build_gui(self):
         # Build all GUI components and layout
+        # Top bar
+        tk.Label(self.root, text="Developed by : LYKA ENTERA & KEA ABAQUITA", bg="#a05a1c", fg="white", anchor="w", font=("Segoe UI", 10, "bold")).place(x=0, y=0, relwidth=1, height=25)
 
-        # Top bar label with developers' names
-        tk.Label(
-            self.root,
-            text="Developed by : LYKA ENTERA & KEA ABAQUITA",
-            bg="#a05a1c",
-            fg="white",
-            anchor="w",
-            font=("Segoe UI", 10, "bold")
-        ).place(x=0, y=0, relwidth=1, height=25)
-
-        # Process input section (Frame with input fields and buttons)
+        # Process input frame
         frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#a05a1c", highlightthickness=2)
         frame.place(x=10, y=35, width=540, height=120)
-
-        # Labels for each field (input fields for processes)
         tk.Label(frame, text="Process", bg="#18120f", fg="white").place(x=10, y=5)
         tk.Label(frame, text="Arrival Time", bg="#18120f", fg="white").place(x=120, y=5)
         tk.Label(frame, text="Exec. Time", bg="#18120f", fg="white").place(x=220, y=5)
         tk.Label(frame, text="Priority", bg="#18120f", fg="white").place(x=320, y=5)
-
-        # Input widgets for adding processes
-        self.pid_entry = ttk.Combobox(frame, values=[f"P{i+1}" for i in range(20)], width=5)  # Dropdown for process ID
+        self.pid_entry = ttk.Combobox(frame, values=[f"P{i+1}" for i in range(20)], width=5)
         self.pid_entry.place(x=10, y=30)
-        self.arrival_entry = tk.Entry(frame, width=8)  # Entry for arrival time
+        self.arrival_entry = tk.Entry(frame, width=8)
         self.arrival_entry.place(x=120, y=30)
-        self.burst_entry = tk.Entry(frame, width=8)  # Entry for burst (execution) time
+        self.burst_entry = tk.Entry(frame, width=8)
         self.burst_entry.place(x=220, y=30)
-        self.priority_entry = tk.Entry(frame, width=5)  # Entry for priority
+        self.priority_entry = tk.Entry(frame, width=5)
         self.priority_entry.place(x=320, y=30)
-
-        # Buttons for managing process list
         tk.Button(frame, text="Add", command=self.add_process, width=6, bg="#a05a1c", fg="white").place(x=400, y=28)
         tk.Button(frame, text="Generate Random", command=self.generate_random, width=15, bg="#a05a1c", fg="white").place(x=10, y=70)
         tk.Button(frame, text="Clear All", command=self.clear_processes, width=10, bg="#a05a1c", fg="white").place(x=140, y=70)
 
-        # Table to display added processes
-        self.table = ttk.Treeview(self.root, columns=("PID", "Arrival", "Burst", "Priority"), show="headings", height=5)  # Treeview for showing processes
+        # Process table
+        self.table = ttk.Treeview(self.root, columns=("PID", "Arrival", "Burst", "Priority"), show="headings", height=5)
         self.table.place(x=10, y=160, width=540, height=120)
         for col in ("PID", "Arrival", "Burst", "Priority"):
             self.table.heading(col, text=col)
             self.table.column(col, width=120, anchor="center")
-
-        # Style configuration for the process table
         style = ttk.Style()
         style.configure("Treeview", background="#18120f", fieldbackground="#18120f", foreground="white", rowheight=24)
         style.map('Treeview', background=[('selected', '#a05a1c')])
 
-        # Frame for algorithm selection and parameters
+        # Algorithm selection
         algo_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#a05a1c", highlightthickness=2)
         algo_frame.place(x=10, y=290, width=540, height=70)
-
-        # Dropdown for selecting scheduling algorithm
         tk.Label(algo_frame, text="Algorithm", bg="#18120f", fg="white").place(x=10, y=5)
         algo_menu = ttk.Combobox(algo_frame, textvariable=self.selected_algorithm, values=["FCFS", "SJF", "SRTF", "Round Robin", "MLFQ"], state="readonly", width=15)
         algo_menu.place(x=10, y=30)
         algo_menu.current(0)
-
-        # Slider for time quantum (used in Round Robin)
         tk.Label(algo_frame, text="Time Quantum (RR)", bg="#18120f", fg="white").place(x=180, y=5)
         tk.Scale(algo_frame, from_=1, to=10, orient=tk.HORIZONTAL, variable=self.quantum, length=120, bg="#18120f", fg="white", highlightthickness=0).place(x=180, y=30)
-
-        # MLFQ input parameters: Quanta and Allotment per level
+        # MLFQ settings
         tk.Label(algo_frame, text="MLFQ Quanta", bg="#18120f", fg="white").place(x=320, y=5)
         for i in range(4):
             tk.Entry(algo_frame, textvariable=self.mlfq_quanta[i], width=2).place(x=320+40*i, y=30, width=30)
-
         tk.Label(algo_frame, text="Allot", bg="#18120f", fg="white").place(x=480, y=5)
         for i in range(4):
             tk.Entry(algo_frame, textvariable=self.mlfq_allot[i], width=2).place(x=480+40*i, y=30, width=30)
 
-        # Action/status message label (for user feedback)
+        # Action message
         tk.Label(self.root, textvariable=self.action_msg, bg="#18120f", fg="red", font=("Segoe UI", 10, "bold")).place(x=10, y=365, width=540, height=25)
 
-        # Frame for simulation controls (speed + simulate button)
+        # Simulation controls
         sim_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#a05a1c", highlightthickness=2)
         sim_frame.place(x=10, y=400, width=540, height=70)
-
-        # Slider to adjust simulation speed
         tk.Label(sim_frame, text="Simulation Speed", bg="#18120f", fg="white").place(x=10, y=5)
         tk.Scale(sim_frame, from_=0.05, to=1.0, resolution=0.05, orient=tk.HORIZONTAL, variable=self.sim_speed, length=200, bg="#18120f", fg="white", highlightthickness=0).place(x=10, y=30)
-
-        # Buttons to start simulation and reset all inputs
         tk.Button(sim_frame, text="Simulate", command=self.start_simulation, width=10, bg="#a05a1c", fg="white").place(x=250, y=20)
         tk.Button(sim_frame, text="Reset All", command=self.reset_all, width=10, bg="#a05a1c", fg="white").place(x=370, y=20)
 
-        # Gantt chart display canvas
-        # The Gantt chart visually represents the timeline of process execution over time
+        # Gantt chart
         tk.Label(self.root, text="Gantt Chart (Each box represents a second)", bg="#18120f", fg="white").place(x=10, y=480)
         self.gantt_canvas = tk.Canvas(self.root, bg="#18120f", highlightbackground="#a05a1c", height=40, width=1060)
         self.gantt_canvas.place(x=10, y=510)
 
-        # Frame for process execution status metrics
+        # Metrics and status
         metrics_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#a05a1c", highlightthickness=2)
         metrics_frame.place(x=570, y=35, width=520, height=540)
         tk.Label(metrics_frame, text="Process", bg="#18120f", fg="white").place(x=10, y=5)
@@ -386,9 +359,6 @@ class CPUSchedulerGUI:
         tk.Label(metrics_frame, text="Completion %", bg="#18120f", fg="white").place(x=200, y=5)
         tk.Label(metrics_frame, text="Remaining", bg="#18120f", fg="white").place(x=320, y=5)
         tk.Label(metrics_frame, text="Waiting", bg="#18120f", fg="white").place(x=420, y=5)
-
-        # Labels for showing individual process metrics
-        # These status labels are dynamically updated during the simulation to reflect current process state
         self.status_labels = []
         for i in range(10):
             row = []
@@ -398,13 +368,143 @@ class CPUSchedulerGUI:
                 row.append(lbl)
             self.status_labels.append(row)
 
-        # Display labels for average statistics
-        self.avg_waiting = tk.StringVar()  # Average waiting time
-        self.avg_turnaround = tk.StringVar()  # Average turnaround time
-        self.avg_response = tk.StringVar()  # Average response time
+        # Averages
+        self.avg_waiting = tk.StringVar()
+        self.avg_turnaround = tk.StringVar()
+        self.avg_response = tk.StringVar()
         tk.Label(self.root, textvariable=self.avg_waiting, bg="#18120f", fg="white", font=("Segoe UI", 10)).place(x=570, y=590, width=170, height=25)
         tk.Label(self.root, textvariable=self.avg_turnaround, bg="#18120f", fg="white", font=("Segoe UI", 10)).place(x=740, y=590, width=170, height=25)
         tk.Label(self.root, textvariable=self.avg_response, bg="#18120f", fg="white", font=("Segoe UI", 10)).place(x=910, y=590, width=170, height=25)
+
+    def add_process(self):
+        # Add a process from user input to the process list
+        pid = self.pid_entry.get() or f"P{len(self.processes)+1}"
+        try:
+            arrival = int(self.arrival_entry.get())
+            burst = int(self.burst_entry.get())
+            priority = int(self.priority_entry.get() or 0)
+        except ValueError:
+            self.action_msg.set("Invalid input!")
+            return
+        if any(p.pid == pid for p in self.processes):
+            self.action_msg.set("Duplicate PID!")
+            return
+        self.processes.append(Process(pid, arrival, burst, priority))
+        self.refresh_table()
+        self.action_msg.set("")
+
+    def generate_random(self):
+        # Generate random processes for simulation
+        n = random.randint(3, 7)
+        self.processes.clear()
+        for i in range(n):
+            pid = f"P{i+1}"
+            arrival = random.randint(0, 5)
+            burst = random.randint(2, 10)
+            priority = random.randint(1, 5)
+            self.processes.append(Process(pid, arrival, burst, priority))
+        self.refresh_table()
+        self.action_msg.set("Random processes generated.")
+
+    def clear_processes(self):
+        # Remove all processes from the list
+        self.processes.clear()
+        self.refresh_table()
+        self.action_msg.set("All processes cleared.")
+
+    def refresh_table(self):
+        # Update the process table in the GUI
+        for row in self.table.get_children():
+            self.table.delete(row)
+        for p in self.processes:
+            self.table.insert('', 'end', values=(p.pid, p.arrival, p.burst, p.priority))
+
+    def start_simulation(self):
+        # Start the simulation in a separate thread
+        if not self.processes:
+            self.action_msg.set("No processes to simulate!")
+            return
+        if self.sim_running:
+            self.action_msg.set("Simulation already running!")
+            return
+        self.sim_running = True
+        self.sim_thread = threading.Thread(target=self.simulate)
+        self.sim_thread.start()
+
+    def simulate(self):
+        # Run the selected scheduling algorithm and update the GUI
+        algo = self.selected_algorithm.get()
+        procs = [Process(p.pid, p.arrival, p.burst, p.priority) for p in self.processes]
+        if algo == "FCFS":
+            result, gantt = fcfs(procs)
+        elif algo == "SJF":
+            result, gantt = sjf(procs)
+        elif algo == "SRTF":
+            result, gantt = srtf(procs)
+        elif algo == "Round Robin":
+            result, gantt = round_robin(procs, self.quantum.get())
+        elif algo == "MLFQ":
+            quanta = [q.get() for q in self.mlfq_quanta]
+            allot = [a.get() for a in self.mlfq_allot]
+            result, gantt = mlfq(procs, quanta, allot)
+        else:
+            self.action_msg.set("Unknown algorithm!")
+            self.sim_running = False
+            return
+        self.gantt_data = gantt
+        self.update_gantt()
+        self.update_status(result)
+        self.update_metrics(result)
+        self.sim_running = False
+
+    def update_gantt(self):
+        # Draw the Gantt chart on the canvas
+        self.gantt_canvas.delete("all")
+        x = 5
+        y = 10
+        h = 20
+        for label, dur in self.gantt_data:
+            color = "#a05a1c" if label != "IDLE" else "#333"
+            self.gantt_canvas.create_rectangle(x, y, x+dur*25, y+h, fill=color, outline="white")
+            self.gantt_canvas.create_text(x+dur*12, y+h//2, text=str(label), fill="white")
+            x += dur*25
+
+    def update_status(self, procs):
+        # Update the status table for each process
+        for i in range(10):
+            if i < len(procs):
+                p = procs[i]
+                self.status_labels[i][0].config(text=p.pid)
+                self.status_labels[i][1].config(text="Done" if p.completion else "-")
+                percent = int(100 * (p.burst - p.remaining) / p.burst) if p.burst else 0
+                self.status_labels[i][2].config(text=f"{percent}%")
+                self.status_labels[i][3].config(text=p.remaining)
+                self.status_labels[i][4].config(text=p.waiting)
+            else:
+                for lbl in self.status_labels[i]:
+                    lbl.config(text="")
+
+    def update_metrics(self, procs):
+        # Calculate and display average metrics
+        n = len(procs)
+        avg_wait = sum(p.waiting for p in procs) / n if n else 0
+        avg_turn = sum(p.turnaround for p in procs) / n if n else 0
+        avg_resp = sum(p.response for p in procs) / n if n else 0
+        self.avg_waiting.set(f"Average Waiting Time: {avg_wait:.2f}")
+        self.avg_turnaround.set(f"Average Turnaround Time: {avg_turn:.2f}")
+        self.avg_response.set(f"Average Response Time: {avg_resp:.2f}")
+
+    def reset_all(self):
+        # Reset all fields and clear the GUI
+        self.clear_processes()
+        self.gantt_canvas.delete("all")
+        for i in range(10):
+            for lbl in self.status_labels[i]:
+                lbl.config(text="")
+        self.avg_waiting.set("")
+        self.avg_turnaround.set("")
+        self.avg_response.set("")
+        self.action_msg.set("")
 
 # -----------------------------
 # Main
