@@ -283,3 +283,48 @@ class CPUSchedulerGUI:
         self.sim_running = False  # Flag to indicate if simulation is active
 
         self._build_gui()  # Build GUI widgets
+
+    def _build_gui(self):
+        # Build all GUI components and layout
+
+        # Top bar label with developers' names
+        tk.Label(
+            self.root,
+            text="Developed by : LYKA ENTERA & KEA ABAQUITA",
+            bg="#a05a1c",
+            fg="white",
+            anchor="w",
+            font=("Segoe UI", 10, "bold")
+        ).place(x=0, y=0, relwidth=1, height=25)
+
+        # Process input section (Frame with input fields and buttons)
+        frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#a05a1c", highlightthickness=2)
+        frame.place(x=10, y=35, width=540, height=120)
+
+        # Labels for each field (input fields for processes)
+        tk.Label(frame, text="Process", bg="#18120f", fg="white").place(x=10, y=5)
+        tk.Label(frame, text="Arrival Time", bg="#18120f", fg="white").place(x=120, y=5)
+        tk.Label(frame, text="Exec. Time", bg="#18120f", fg="white").place(x=220, y=5)
+        tk.Label(frame, text="Priority", bg="#18120f", fg="white").place(x=320, y=5)
+
+        # Input widgets for adding processes
+        self.pid_entry = ttk.Combobox(frame, values=[f"P{i+1}" for i in range(20)], width=5)  # Dropdown for process ID
+        self.pid_entry.place(x=10, y=30)
+        self.arrival_entry = tk.Entry(frame, width=8)  # Entry for arrival time
+        self.arrival_entry.place(x=120, y=30)
+        self.burst_entry = tk.Entry(frame, width=8)  # Entry for burst (execution) time
+        self.burst_entry.place(x=220, y=30)
+        self.priority_entry = tk.Entry(frame, width=5)  # Entry for priority
+        self.priority_entry.place(x=320, y=30)
+
+        # Buttons for managing process list
+        tk.Button(frame, text="Add", command=self.add_process, width=6, bg="#a05a1c", fg="white").place(x=400, y=28)
+        tk.Button(frame, text="Generate Random", command=self.generate_random, width=15, bg="#a05a1c", fg="white").place(x=10, y=70)
+        tk.Button(frame, text="Clear All", command=self.clear_processes, width=10, bg="#a05a1c", fg="white").place(x=140, y=70)
+
+        # Table to display added processes
+        self.table = ttk.Treeview(self.root, columns=("PID", "Arrival", "Burst", "Priority"), show="headings", height=5)  # Treeview for showing processes
+        self.table.place(x=10, y=160, width=540, height=120)
+        for col in ("PID", "Arrival", "Burst", "Priority"):
+            self.table.heading(col, text=col)
+            self.table.column(col, width=120, anchor="center")
