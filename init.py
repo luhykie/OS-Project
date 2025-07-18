@@ -304,9 +304,9 @@ class CPUSchedulerGUI:
         self.burst_entry.place(x=220, y=30)
         self.priority_entry = tk.Entry(frame, width=5)
         self.priority_entry.place(x=320, y=30)
-        tk.Button(frame, text="Add", command=self.add_process, width=6, bg="#fc6ec8", fg="#f5d3e8").place(x=400, y=28)
-        tk.Button(frame, text="Generate Random", command=self.generate_random, width=15, bg="#fc6ec8", fg="#f5d3e8").place(x=10, y=70)
-        tk.Button(frame, text="Clear All", command=self.clear_processes, width=10, bg="#fc6ec8", fg="#f5d3e8").place(x=140, y=70)
+        tk.Button(frame, text="Add", command=self.add_process, width=6, bg="#fc6ec8", fg="#ff009d").place(x=400, y=28)
+        tk.Button(frame, text="Generate Random", command=self.generate_random, width=15, bg="#fc6ec8", fg="#ff009d").place(x=10, y=70)
+        tk.Button(frame, text="Clear All", command=self.clear_processes, width=10, bg="#fc6ec8", fg="#ff009d").place(x=140, y=70)
 
         # Process table
         self.table = ttk.Treeview(self.root, columns=("PID", "Arrival", "Burst", "Priority"), show="headings", height=5)
@@ -315,23 +315,23 @@ class CPUSchedulerGUI:
             self.table.heading(col, text=col)
             self.table.column(col, width=120, anchor="center")
         style = ttk.Style()
-        style.configure("Treeview", background="#18120f", fieldbackground="#18120f", foreground="#f5d3e8", rowheight=24)
+        style.configure("Treeview", background="#18120f", fieldbackground="#18120f", foreground="#ff009d", rowheight=24)
         style.map('Treeview', background=[('selected', '#fc6ec8')])
 
         # Algorithm selection
         algo_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#fc6ec8", highlightthickness=2)
         algo_frame.place(x=10, y=290, width=540, height=70)
-        tk.Label(algo_frame, text="Algorithm", bg="#18120f", fg="#f5d3e8").place(x=10, y=5)
+        tk.Label(algo_frame, text="Algorithm", bg="#18120f", fg="#ff009d").place(x=10, y=5)
         algo_menu = ttk.Combobox(algo_frame, textvariable=self.selected_algorithm, values=["FCFS", "SJF", "SRTF", "Round Robin", "MLFQ"], state="readonly", width=15)
         algo_menu.place(x=10, y=30)
         algo_menu.current(0)
-        tk.Label(algo_frame, text="Time Quantum (RR)", bg="#18120f", fg="#f5d3e8").place(x=180, y=5)
-        tk.Scale(algo_frame, from_=1, to=10, orient=tk.HORIZONTAL, variable=self.quantum, length=120, bg="#18120f", fg="#f5d3e8", highlightthickness=0).place(x=180, y=30)
+        tk.Label(algo_frame, text="Time Quantum (RR)", bg="#18120f", fg="#ff009d").place(x=180, y=5)
+        tk.Scale(algo_frame, from_=1, to=10, orient=tk.HORIZONTAL, variable=self.quantum, length=120, bg="#18120f", fg="#ff009d", highlightthickness=0).place(x=180, y=30)
         # MLFQ settings
-        tk.Label(algo_frame, text="MLFQ Quanta", bg="#18120f", fg="#f5d3e8").place(x=320, y=5)
+        tk.Label(algo_frame, text="MLFQ Quanta", bg="#18120f", fg="#ff009d").place(x=320, y=5)
         for i in range(4):
             tk.Entry(algo_frame, textvariable=self.mlfq_quanta[i], width=2).place(x=320+40*i, y=30, width=30)
-        tk.Label(algo_frame, text="Allot", bg="#18120f", fg="#f5d3e8").place(x=480, y=5)
+        tk.Label(algo_frame, text="Allot", bg="#18120f", fg="#ff009d").place(x=480, y=5)
         for i in range(4):
             tk.Entry(algo_frame, textvariable=self.mlfq_allot[i], width=2).place(x=480+40*i, y=30, width=30)
 
@@ -341,29 +341,29 @@ class CPUSchedulerGUI:
         # Simulation controls
         sim_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#fc6ec8", highlightthickness=2)
         sim_frame.place(x=10, y=400, width=540, height=70)
-        tk.Label(sim_frame, text="Simulation Speed", bg="#18120f", fg="#f5d3e8").place(x=10, y=5)
-        tk.Scale(sim_frame, from_=0.05, to=1.0, resolution=0.05, orient=tk.HORIZONTAL, variable=self.sim_speed, length=200, bg="#18120f", fg="#f5d3e8", highlightthickness=0).place(x=10, y=30)
-        tk.Button(sim_frame, text="Simulate", command=self.start_simulation, width=10, bg="#fc6ec8", fg="#f5d3e8").place(x=250, y=20)
-        tk.Button(sim_frame, text="Reset All", command=self.reset_all, width=10, bg="#fc6ec8", fg="#f5d3e8").place(x=370, y=20)
+        tk.Label(sim_frame, text="Simulation Speed", bg="#18120f", fg="#ff009d").place(x=10, y=5)
+        tk.Scale(sim_frame, from_=0.05, to=1.0, resolution=0.05, orient=tk.HORIZONTAL, variable=self.sim_speed, length=200, bg="#18120f", fg="#ff009d", highlightthickness=0).place(x=10, y=30)
+        tk.Button(sim_frame, text="Simulate", command=self.start_simulation, width=10, bg="#fc6ec8", fg="#ff009d").place(x=250, y=20)
+        tk.Button(sim_frame, text="Reset All", command=self.reset_all, width=10, bg="#fc6ec8", fg="#ff009d").place(x=370, y=20)
 
         # Gantt chart
-        tk.Label(self.root, text="Gantt Chart (Each box represents a second)", bg="#18120f", fg="#f5d3e8").place(x=10, y=480)
+        tk.Label(self.root, text="Gantt Chart (Each box represents a second)", bg="#18120f", fg="#ff009d").place(x=10, y=480)
         self.gantt_canvas = tk.Canvas(self.root, bg="#18120f", highlightbackground="#fc6ec8", height=40, width=1060)
         self.gantt_canvas.place(x=10, y=510)
 
         # Metrics and status
         metrics_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#fc6ec8", highlightthickness=2)
         metrics_frame.place(x=570, y=35, width=520, height=540)
-        tk.Label(metrics_frame, text="Process", bg="#18120f", fg="#f5d3e8").place(x=10, y=5)
-        tk.Label(metrics_frame, text="Status", bg="#18120f", fg="#f5d3e8").place(x=100, y=5)
-        tk.Label(metrics_frame, text="Completion %", bg="#18120f", fg="#f5d3e8").place(x=200, y=5)
-        tk.Label(metrics_frame, text="Remaining", bg="#18120f", fg="#f5d3e8").place(x=320, y=5)
-        tk.Label(metrics_frame, text="Waiting", bg="#18120f", fg="#f5d3e8").place(x=420, y=5)
+        tk.Label(metrics_frame, text="Process", bg="#18120f", fg="#ff009d").place(x=10, y=5)
+        tk.Label(metrics_frame, text="Status", bg="#18120f", fg="#ff009d").place(x=100, y=5)
+        tk.Label(metrics_frame, text="Completion %", bg="#18120f", fg="#ff009d").place(x=200, y=5)
+        tk.Label(metrics_frame, text="Remaining", bg="#18120f", fg="#ff009d").place(x=320, y=5)
+        tk.Label(metrics_frame, text="Waiting", bg="#18120f", fg="#ff009d").place(x=420, y=5)
         self.status_labels = []
         for i in range(10):
             row = []
             for j, w in enumerate([70, 90, 100, 100, 100]):
-                lbl = tk.Label(metrics_frame, text="", bg="#18120f", fg="#f5d3e8", width=10, anchor="center")
+                lbl = tk.Label(metrics_frame, text="", bg="#18120f", fg="#ff009d", width=10, anchor="center")
                 lbl.place(x=10+sum([70,90,100,100,100][:j]), y=30+i*25, width=w, height=22)
                 row.append(lbl)
             self.status_labels.append(row)
@@ -372,9 +372,9 @@ class CPUSchedulerGUI:
         self.avg_waiting = tk.StringVar()
         self.avg_turnaround = tk.StringVar()
         self.avg_response = tk.StringVar()
-        tk.Label(self.root, textvariable=self.avg_waiting, bg="#18120f", fg="#f5d3e8", font=("Segoe UI", 10)).place(x=570, y=590, width=170, height=25)
-        tk.Label(self.root, textvariable=self.avg_turnaround, bg="#18120f", fg="#f5d3e8", font=("Segoe UI", 10)).place(x=740, y=590, width=170, height=25)
-        tk.Label(self.root, textvariable=self.avg_response, bg="#18120f", fg="#f5d3e8", font=("Segoe UI", 10)).place(x=910, y=590, width=170, height=25)
+        tk.Label(self.root, textvariable=self.avg_waiting, bg="#18120f", fg="#ff009d", font=("Segoe UI", 10)).place(x=570, y=590, width=170, height=25)
+        tk.Label(self.root, textvariable=self.avg_turnaround, bg="#18120f", fg="#ff009d", font=("Segoe UI", 10)).place(x=740, y=590, width=170, height=25)
+        tk.Label(self.root, textvariable=self.avg_response, bg="#18120f", fg="#ff009d", font=("Segoe UI", 10)).place(x=910, y=590, width=170, height=25)
 
     def add_process(self):
         # Add a process from user input to the process list
