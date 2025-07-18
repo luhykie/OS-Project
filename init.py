@@ -328,3 +328,80 @@ class CPUSchedulerGUI:
         for col in ("PID", "Arrival", "Burst", "Priority"):
             self.table.heading(col, text=col)
             self.table.column(col, width=120, anchor="center")
+
+        # Style configuration for the process table
+        style = ttk.Style()
+        style.configure("Treeview", background="#18120f", fieldbackground="#18120f", foreground="white", rowheight=24)
+        style.map('Treeview', background=[('selected', '#a05a1c')])
+
+        # Frame for algorithm selection and parameters
+        algo_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#a05a1c", highlightthickness=2)
+        algo_frame.place(x=10, y=290, width=540, height=70)
+
+        # Dropdown for selecting scheduling algorithm
+        tk.Label(algo_frame, text="Algorithm", bg="#18120f", fg="white").place(x=10, y=5)
+        algo_menu = ttk.Combobox(algo_frame, textvariable=self.selected_algorithm, values=["FCFS", "SJF", "SRTF", "Round Robin", "MLFQ"], state="readonly", width=15)
+        algo_menu.place(x=10, y=30)
+        algo_menu.current(0)
+
+        # Slider for time quantum (used in Round Robin)
+        tk.Label(algo_frame, text="Time Quantum (RR)", bg="#18120f", fg="white").place(x=180, y=5)
+        tk.Scale(algo_frame, from_=1, to=10, orient=tk.HORIZONTAL, variable=self.quantum, length=120, bg="#18120f", fg="white", highlightthickness=0).place(x=180, y=30)
+
+        # MLFQ input parameters: Quanta and Allotment per level
+        tk.Label(algo_frame, text="MLFQ Quanta", bg="#18120f", fg="white").place(x=320, y=5)
+        for i in range(4):
+            tk.Entry(algo_frame, textvariable=self.mlfq_quanta[i], width=2).place(x=320+40*i, y=30, width=30)
+
+        tk.Label(algo_frame, text="Allot", bg="#18120f", fg="white").place(x=480, y=5)
+        for i in range(4):
+            tk.Entry(algo_frame, textvariable=self.mlfq_allot[i], width=2).place(x=480+40*i, y=30, width=30)
+
+        # Action/status message label (for user feedback)
+        tk.Label(self.root, textvariable=self.action_msg, bg="#18120f", fg="red", font=("Segoe UI", 10, "bold")).place(x=10, y=365, width=540, height=25)
+
+        # Frame for simulation controls (speed + simulate button)
+        sim_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#a05a1c", highlightthickness=2)
+        sim_frame.place(x=10, y=400, width=540, height=70)
+
+        # Slider to adjust simulation speed
+        tk.Label(sim_frame, text="Simulation Speed", bg="#18120f", fg="white").place(x=10, y=5)
+        tk.Scale(sim_frame, from_=0.05, to=1.0, resolution=0.05, orient=tk.HORIZONTAL, variable=self.sim_speed, length=200, bg="#18120f", fg="white", highlightthickness=0).place(x=10, y=30)
+
+        # Buttons to start simulation and reset all inputs
+        tk.Button(sim_frame, text="Simulate", command=self.start_simulation, width=10, bg="#a05a1c", fg="white").place(x=250, y=20)
+        tk.Button(sim_frame, text="Reset All", command=self.reset_all, width=10, bg="#a05a1c", fg="white").place(x=370, y=20)
+
+        # Gantt chart display canvas
+        # The Gantt chart visually represents the timeline of process execution over time
+        tk.Label(self.root, text="Gantt Chart (Each box represents a second)", bg="#18120f", fg="white").place(x=10, y=480)
+        self.gantt_canvas = tk.Canvas(self.root, bg="#18120f", highlightbackground="#a05a1c", height=40, width=1060)
+        self.gantt_canvas.place(x=10, y=510)
+
+        # Frame for process execution status metrics
+        metrics_frame = tk.Frame(self.root, bg="#18120f", highlightbackground="#a05a1c", highlightthickness=2)
+        metrics_frame.place(x=570, y=35, width=520, height=540)
+        tk.Label(metrics_frame, text="Process", bg="#18120f", fg="white").place(x=10, y=5)
+        tk.Label(metrics_frame, text="Status", bg="#18120f", fg="white").place(x=100, y=5)
+        tk.Label(metrics_frame, text="Completion %", bg="#18120f", fg="white").place(x=200, y=5)
+        tk.Label(metrics_frame, text="Remaining", bg="#18120f", fg="white").place(x=320, y=5)
+        tk.Label(metrics_frame, text="Waiting", bg="#18120f", fg="white").place(x=420, y=5)
+
+        # Labels for showing individual process metrics
+        # These status labels are dynamically updated during the simulation to reflect current process state
+        self.status_labels = []
+        for i in range(10):
+            row = []
+            for j, w in enumerate([70, 90, 100, 100, 100]):
+                lbl = tk.Label(metrics_frame, text="", bg="#18120f", fg="white", width=10, anchor="center")
+                lbl.place(x=10+sum([70,90,100,100,100][:j]), y=30+i*25, width=w, height=22)
+                row.append(lbl)
+            self.status_labels.append(row)
+
+        # Display labels for average statistics
+        self.avg_waiting = tk.StringVar()  # Average waiting time
+        self.avg_turnaround = tk.StringVar()  # Average turnaround time
+        self.avg_response = tk.StringVar()  # Average response time
+        tk.Label(self.root, textvariable=self.avg_waiting, bg="#18120f", fg="white", font=("Segoe UI", 10)).place(x=570, y=590, width=170, height=25)
+        tk.Label(self.root, textvariable=self.avg_turnaround, bg="#18120f", fg="white", font=("Segoe UI", 10)).place(x=740, y=590, width=170, height=25)
+        tk.Label(self.root, textvariable=self.avg_response, bg="#18120f", fg="white", font=("Segoe UI", 10)).place(x=910, y=590, width=170, height=25)
