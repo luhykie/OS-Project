@@ -282,7 +282,7 @@ class CPUSchedulerGUI:
         self.sim_running = False # Flag to check if simulation is running
         self._build_gui() 
 
-    def _build_gui(self):
+    def _build_gui(self):   
         # Build all GUI components and layout
         # Top bar
         tk.Label(self.root, text="☆彡 Developed by: LYKA ENTERA & KEA ABAQUITA ミ★", bg="#FF1493", fg="white", anchor="w", font=("Arial", 10, "bold")).place(x=0, y=0, relwidth=1, height=25)
