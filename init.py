@@ -45,15 +45,17 @@ def fcfs(processes):
     time = 0
     gantt = []
     for p in procs:
+        # Wait for process to arrive if CPU is idle
         if time < p.arrival:
             gantt.append(('IDLE', p.arrival - time))
             time = p.arrival
         p.start = time
         p.response = time - p.arrival
-        time += p.burst
-        p.completion = time
+        p.completion = time + p.burst
         p.turnaround = p.completion - p.arrival
         p.waiting = p.turnaround - p.burst
+        p.remaining = 0
+        time = p.completion
         gantt.append((p.pid, p.burst))
     return procs, gantt
     
@@ -79,10 +81,11 @@ def sjf(processes):
                 time = p.arrival
             p.start = time
             p.response = time - p.arrival
-            time += p.burst
-            p.completion = time
+            p.completion = time + p.burst
             p.turnaround = p.completion - p.arrival
             p.waiting = p.turnaround - p.burst
+            p.remaining = 0
+            time = p.completion
             gantt.append((p.pid, p.burst))
             completed += 1
         else:
@@ -268,7 +271,7 @@ class CPUSchedulerGUI:
         self.root = root
         self.root.title("OS: CPU Scheduler")
         self.root.configure(bg="#1A1A1A")  # Black background
-        self.root.geometry("1280x700")  # Set window size
+        self.root.geometry("1370x700")  # Set window size
         self.root.resizable(False, False) # Disable resizing
         self.processes = [] # List to hold Process objects
         self.selected_algorithm = tk.StringVar() # Selected scheduling algorithm
@@ -282,7 +285,7 @@ class CPUSchedulerGUI:
         self.sim_running = False # Flag to check if simulation is running
         self._build_gui() 
 
-    def _build_gui(self):   
+    def _build_gui(self):
         # Build all GUI components and layout
         # Top bar
         tk.Label(self.root, text="☆彡 Developed by: LYKA ENTERA & KEA ABAQUITA ミ★", bg="#FF1493", fg="white", anchor="w", font=("Arial", 10, "bold")).place(x=0, y=0, relwidth=1, height=25)
@@ -292,7 +295,7 @@ class CPUSchedulerGUI:
         frame.place(x=10, y=35, width=540, height=120)
         tk.Label(frame, text="✧ Process", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=4, y=5)
         tk.Label(frame, text="✧ Arrival Time", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=100, y=5)
-        tk.Label(frame, text="✧ Exec. Time", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=203, y=5)
+        tk.Label(frame, text="✧ Burst Time", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=203, y=5)
         # Removed Priority label and entry
         self.pid_entry = ttk.Combobox(frame, values=[f"P{i+1}" for i in range(20)], width=5)
         self.pid_entry.place(x=10, y=30)
@@ -317,7 +320,7 @@ class CPUSchedulerGUI:
 
         # Algorithm selection
         algo_frame = tk.Frame(self.root, bg="#1A1A1A", highlightbackground="#FF1493", highlightthickness=2)
-        algo_frame.place(x=10, y=290, width=560, height=70)
+        algo_frame.place(x=10, y=290, width=635, height=70)
         tk.Label(algo_frame, text="♪ Algorithm", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=10, y=5)
         algo_menu = ttk.Combobox(algo_frame, textvariable=self.selected_algorithm, values=["FCFS", "SJF", "SRTF", "Round Robin", "MLFQ"], state="readonly", width=15)
         algo_menu.place(x=10, y=30)
@@ -328,9 +331,11 @@ class CPUSchedulerGUI:
         tk.Label(algo_frame, text="✰ MLFQ Quanta", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=330, y=5)
         for i in range(4):
             tk.Entry(algo_frame, textvariable=self.mlfq_quanta[i], width=2, bg="#2A2A2A", fg="#FF69B4").place(x=320+40*i, y=30, width=30) 
-        tk.Label(algo_frame, text="★ Allot", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=470, y=5) 
+        # Allot label in same style/format as Quanta
+        tk.Label(algo_frame, text="✰ MLFQ Allot", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=470, y=5)
+        # Allot entry boxes horizontally aligned like Quanta
         for i in range(4):
-            tk.Entry(algo_frame, textvariable=self.mlfq_allot[i], width=2, bg="#2A2A2A", fg="#FF69B4").place(x=480+40*i, y=30, width=30)
+            tk.Entry(algo_frame, textvariable=self.mlfq_allot[i], width=2, bg="#2A2A2A", fg="#FF69B4").place(x=470+40*i, y=30, width=30)
 
         # Action message
         tk.Label(self.root, textvariable=self.action_msg, bg="#1A1A1A", fg="#FF69B4", font=("Arial", 10, "bold")).place(x=10, y=365, width=540, height=25)
@@ -350,9 +355,9 @@ class CPUSchedulerGUI:
         
         # Metrics and status
         metrics_frame = tk.Frame(self.root, bg="#1A1A1A", highlightbackground="#FF1493", highlightthickness=2)
-        metrics_frame.place(x=580, y=35, width=670, height=470)
+        metrics_frame.place(x=650, y=35, width=700, height=470)
         # Improved spacing for metrics/status table
-        col_widths = [90, 90, 120, 90, 90, 110, 120]  # wider columns
+        col_widths = [70, 80, 110, 85, 90, 80, 100]  # wider columns
         col_positions = []
         current_pos = 20  # more left margin
         for width in col_widths:
@@ -524,12 +529,19 @@ class CPUSchedulerGUI:
             if i < len(procs):
                 p = procs[i]
                 self.status_labels[i][0].config(text=p.pid)
-                # Show '✓ Done' only if process is completed, else show '✧ Running' or '✧ Waiting'
-                status = "✓ Done" if p.completion and p.remaining == 0 else ("✧ Running" if p.remaining < p.burst and p.remaining > 0 else "✧ Waiting")
+                # Status: ✓ Done if completed, ✧ Running if started but not done, ✧ Waiting if not started
+                if p.completion and p.remaining == 0:
+                    status = "✓ Done"
+                elif p.start != -1 and p.remaining > 0:
+                    status = "✧ Running"
+                else:
+                    status = "✧ Waiting"
                 self.status_labels[i][1].config(text=status)
                 percent = int(100 * (p.burst - p.remaining) / p.burst) if p.burst else 0
+                if p.completion and p.remaining == 0:
+                    percent = 100
                 self.status_labels[i][2].config(text=f"{percent}%")
-                self.status_labels[i][3].config(text=f"{p.remaining}")
+                self.status_labels[i][3].config(text=f"{p.remaining if p.remaining >= 0 else 0}")
                 self.status_labels[i][4].config(text=f"{p.waiting}")
                 self.status_labels[i][5].config(text=f"{p.response if p.response != -1 else '-'}")
                 self.status_labels[i][6].config(text=f"{p.turnaround if p.turnaround != 0 else '-'}")
@@ -585,8 +597,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = CPUSchedulerGUI(root)
     root.mainloop()
-
-
-
-
-
