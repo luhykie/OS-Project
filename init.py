@@ -292,7 +292,7 @@ class CPUSchedulerGUI:
 
         # Process input frame
         frame = tk.Frame(self.root, bg="#1A1A1A", highlightbackground="#FF1493", highlightthickness=2)
-        frame.place(x=10, y=35, width=540, height=120)
+        frame.place(x=10, y=35, width=635, height=120)
         tk.Label(frame, text="✧ Process", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=4, y=5)
         tk.Label(frame, text="✧ Arrival Time", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=100, y=5)
         tk.Label(frame, text="✧ Burst Time", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=203, y=5)
@@ -310,7 +310,7 @@ class CPUSchedulerGUI:
 
         # Process table
         self.table = ttk.Treeview(self.root, columns=("PID", "Arrival", "Burst", "Response", "Turnaround"), show="headings", height=5)
-        self.table.place(x=10, y=160, width=540, height=120)
+        self.table.place(x=10, y=160, width=635, height=120)
         for col, width in zip(("PID", "Arrival", "Burst", "Response", "Turnaround"), (80, 80, 80, 100, 120)):
             self.table.heading(col, text=col)
             self.table.column(col, width=width, anchor="center")
@@ -328,21 +328,21 @@ class CPUSchedulerGUI:
         tk.Label(algo_frame, text="♫ Time Quantum (RR)", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=180, y=5)
         tk.Scale(algo_frame, from_=1, to=10, orient=tk.HORIZONTAL, variable=self.quantum, length=120, bg="#1A1A1A", fg="#FF69B4", highlightthickness=0, troughcolor="#2A2A2A").place(x=180, y=30)
         # MLFQ settings
-        tk.Label(algo_frame, text="✰ MLFQ Quanta", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=330, y=5)
+        tk.Label(algo_frame, text="✰ MLFQ Quanta", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=340, y=5)
         for i in range(4):
-            tk.Entry(algo_frame, textvariable=self.mlfq_quanta[i], width=2, bg="#2A2A2A", fg="#FF69B4").place(x=320+40*i, y=30, width=30) 
+            tk.Entry(algo_frame, textvariable=self.mlfq_quanta[i], width=2, bg="#2A2A2A", fg="#FF69B4").place(x=320+40*i, y=30, width=20) 
         # Allot label in same style/format as Quanta
-        tk.Label(algo_frame, text="✰ MLFQ Allot", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=470, y=5)
+        tk.Label(algo_frame, text="✰ MLFQ Allot", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=500, y=5)
         # Allot entry boxes horizontally aligned like Quanta
         for i in range(4):
-            tk.Entry(algo_frame, textvariable=self.mlfq_allot[i], width=2, bg="#2A2A2A", fg="#FF69B4").place(x=470+40*i, y=30, width=30)
+            tk.Entry(algo_frame, textvariable=self.mlfq_allot[i], width=2, bg="#2A2A2A", fg="#FF69B4").place(x=470+40*i, y=30, width=20)
 
         # Action message
         tk.Label(self.root, textvariable=self.action_msg, bg="#1A1A1A", fg="#FF69B4", font=("Arial", 10, "bold")).place(x=10, y=365, width=540, height=25)
 
         # Simulation controls
         sim_frame = tk.Frame(self.root, bg="#1A1A1A", highlightbackground="#FF1493", highlightthickness=2)
-        sim_frame.place(x=10, y=400, width=540, height=70)
+        sim_frame.place(x=10, y=400, width=635, height=70)
         tk.Label(sim_frame, text="✧ Simulation Speed ✧", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=10, y=5)
         tk.Scale(sim_frame, from_=0.05, to=1.0, resolution=0.05, orient=tk.HORIZONTAL, variable=self.sim_speed, length=200, bg="#1A1A1A", fg="#FF69B4", highlightthickness=0, troughcolor="#2A2A2A").place(x=10, y=30)
         tk.Button(sim_frame, text="★ Simulate ★", command=self.start_simulation, width=12, bg="#FF1493", fg="white", font=("Arial", 9)).place(x=250, y=20)
@@ -350,7 +350,7 @@ class CPUSchedulerGUI:
 
         # Gantt chart
         tk.Label(self.root, text="♡ Gantt Chart ♡ (Each box is one time unit)", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=10, y=480)
-        self.gantt_canvas = tk.Canvas(self.root, bg="#1A1A1A", highlightbackground="#FF1493", height=60, width=1235)
+        self.gantt_canvas = tk.Canvas(self.root, bg="#1A1A1A", highlightbackground="#FF1493", height=60, width=1335)
         self.gantt_canvas.place(x=10, y=510)
         
         # Metrics and status
@@ -390,11 +390,11 @@ class CPUSchedulerGUI:
         
         # Create decorated frames for averages with pink background
         avg_wait_frame = tk.Frame(self.root, bg="#FF69B4", highlightthickness=1, highlightbackground="#FF1493")
-        avg_wait_frame.place(x=18, y=585, width=1225, height=25)
+        avg_wait_frame.place(x=18, y=585, width=1335, height=25)
         avg_turn_frame = tk.Frame(self.root, bg="#FF69B4", highlightthickness=1, highlightbackground="#FF1493")
-        avg_turn_frame.place(x=18, y=625, width=1225, height=25)
+        avg_turn_frame.place(x=18, y=625, width=1335, height=25)
         avg_resp_frame = tk.Frame(self.root, bg="#FF69B4", highlightthickness=1, highlightbackground="#FF1493")
-        avg_resp_frame.place(x=18, y=665, width=1225, height=25)
+        avg_resp_frame.place(x=18, y=665, width=1335, height=25)
         
         # Place labels on colored frames
         tk.Label(avg_wait_frame, textvariable=self.avg_waiting, bg="#FF69B4", fg="#FFD1E0", font=("Arial", 9, "bold")).pack(fill=tk.BOTH, expand=True)
@@ -597,3 +597,8 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = CPUSchedulerGUI(root)
     root.mainloop()
+
+
+
+
+
