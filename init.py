@@ -40,6 +40,7 @@ class Process:
 # -----------------------------
 def fcfs(processes):
     # First-Come, First-Served scheduling
+    # print(processes)
     procs = sorted(processes, key=lambda p: (p.arrival, p.pid))
     time = 0
     gantt = []
@@ -273,7 +274,7 @@ class CPUSchedulerGUI:
         self.selected_algorithm = tk.StringVar() # Selected scheduling algorithm
         self.quantum = tk.IntVar(value=1) # Time quantum for Round Robin
         self.sim_speed = tk.DoubleVar(value=0.1) # Simulation speed
-        self.mlfq_quanta = [tk.IntVar(value=2) for _ in range(4)] # Quanta for MLFQ queues
+        self.mlfq_quanta = [tk.IntVar(value=v) for v in [2, 4, 8, 16]] # Quanta for MLFQ queues
         self.mlfq_allot = [tk.IntVar(value=4) for _ in range(4)] # Allotment for MLFQ queues
         self.action_msg = tk.StringVar() # Action message for user feedback
         self.gantt_data = [] # Data for Gantt chart
@@ -292,23 +293,22 @@ class CPUSchedulerGUI:
         tk.Label(frame, text="✧ Process", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=4, y=5)
         tk.Label(frame, text="✧ Arrival Time", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=100, y=5)
         tk.Label(frame, text="✧ Exec. Time", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=203, y=5)
-        tk.Label(frame, text="✧ Priority", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=305, y=5)
+        # Removed Priority label and entry
         self.pid_entry = ttk.Combobox(frame, values=[f"P{i+1}" for i in range(20)], width=5)
         self.pid_entry.place(x=10, y=30)
         self.arrival_entry = tk.Entry(frame, width=8, bg="#2A2A2A", fg="#FF69B4")
         self.arrival_entry.place(x=120, y=30)
         self.burst_entry = tk.Entry(frame, width=8, bg="#2A2A2A", fg="#FF69B4")
         self.burst_entry.place(x=220, y=30)
-        self.priority_entry = tk.Entry(frame, width=5, bg="#2A2A2A", fg="#FF69B4")
-        self.priority_entry.place(x=320, y=30)
-        tk.Button(frame, text="Add ♡", command=self.add_process, width=6, bg="#FF1493", fg="white", font=("Arial", 8)).place(x=400, y=28)
+        # Removed Priority entry
+        tk.Button(frame, text="Add ♡", command=self.add_process, width=6, bg="#FF1493", fg="white", font=("Arial", 8)).place(x=300, y=28)
         tk.Button(frame, text="Generate Random ✩", command=self.generate_random, width=18, bg="#FF1493", fg="white", font=("Arial", 8)).place(x=10, y=70)
         tk.Button(frame, text="Clear All ♪", command=self.clear_processes, width=10, bg="#FF1493", fg="white", font=("Arial", 8)).place(x=140, y=70)
 
         # Process table
-        self.table = ttk.Treeview(self.root, columns=("PID", "Arrival", "Burst", "Priority", "Response", "Turnaround"), show="headings", height=5)
+        self.table = ttk.Treeview(self.root, columns=("PID", "Arrival", "Burst", "Response", "Turnaround"), show="headings", height=5)
         self.table.place(x=10, y=160, width=540, height=120)
-        for col, width in zip(("PID", "Arrival", "Burst", "Priority", "Response", "Turnaround"), (80, 80, 80, 80, 100, 120)):
+        for col, width in zip(("PID", "Arrival", "Burst", "Response", "Turnaround"), (80, 80, 80, 100, 120)):
             self.table.heading(col, text=col)
             self.table.column(col, width=width, anchor="center")
         style = ttk.Style()
@@ -358,12 +358,20 @@ class CPUSchedulerGUI:
         tk.Label(metrics_frame, text="✿ Waiting", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=380, y=5)
         tk.Label(metrics_frame, text="✿ Response", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=460, y=5)
         tk.Label(metrics_frame, text="✿ Turnaround", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=550, y=5)
+        col_widths = [60, 60, 80, 60, 60, 60, 70]
+        col_positions = []
+        current_pos = 10
+        for width in col_widths:
+            col_positions.append(current_pos)
+            current_pos += width
+
         self.status_labels = []
         for i in range(10):
             row = []
-            for j, w in enumerate([60, 60, 80, 60, 60, 60, 70]):
-                lbl = tk.Label(metrics_frame, text="", bg="#1A1A1A", fg="#FF69B4", width=10, anchor="center", font=("Arial", 8))
-                lbl.place(x=10+sum([60, 60, 80, 60, 60, 60, 70][:j]), y=30+i*25, width=w, height=22)
+            for j in range(len(col_widths)):
+                bg_color = "#252525" if i % 2 == 1 else "#1A1A1A"  # alternating row color
+                lbl = tk.Label(metrics_frame, text="", bg=bg_color, fg="#FF8DC7", anchor="center", font=("Arial", 8))
+                lbl.place(x=col_positions[j], y=30 + i * 25, width=col_widths[j], height=22)
                 row.append(lbl)
             self.status_labels.append(row)
 
@@ -391,33 +399,36 @@ class CPUSchedulerGUI:
         try:
             arrival = int(self.arrival_entry.get())
             burst = int(self.burst_entry.get())
-            priority = int(self.priority_entry.get() or 0)
-            
+            # Removed priority input
             # Validate input values
             if burst <= 0:
                 self.action_msg.set("✘ Execution time must be greater than 0! ✘")
                 return
-                
         except ValueError:
             self.action_msg.set("✘ Invalid input values! Please check! ✘")
             return
         if any(p.pid == pid for p in self.processes):
             self.action_msg.set("✘ Duplicate PID detected! ✘")
             return
-        self.processes.append(Process(pid, arrival, burst, priority))
+        self.processes.append(Process(pid, arrival, burst))  # Removed priority
         self.refresh_table()
         self.action_msg.set("")
 
     def generate_random(self):
         # Generate random processes for simulation
         n = random.randint(3, 7)
+        # print(n)
+        # print(self.processes)
+        no_process = self.pid_entry.get() or f"P{len(self.processes)+1}"
+        num = no_process[1]
+        processes = int(num)
+        # print(processes)
         self.processes.clear()
-        for i in range(n):
+        for i in range(processes):
             pid = f"P{i+1}"
             arrival = random.randint(0, 5)
             burst = random.randint(1, 10)  # Ensure minimum burst time of 1
-            priority = random.randint(1, 5)
-            self.processes.append(Process(pid, arrival, burst, priority))
+            self.processes.append(Process(pid, arrival, burst))  # Removed priority
         self.refresh_table()
         self.action_msg.set("✧ Random processes generated!")
 
@@ -434,7 +445,7 @@ class CPUSchedulerGUI:
         for p in self.processes:
             response = p.response if p.response != -1 else "-"
             turnaround = p.turnaround if p.turnaround != 0 else "-"
-            self.table.insert('', 'end', values=(p.pid, p.arrival, p.burst, p.priority, response, turnaround))
+            self.table.insert('', 'end', values=(p.pid, p.arrival, p.burst, response, turnaround))
 
     def start_simulation(self):
         # Start the simulation in a separate thread
@@ -469,7 +480,7 @@ class CPUSchedulerGUI:
     def simulate(self):
         # Run the selected scheduling algorithm and update the GUI
         algo = self.selected_algorithm.get()
-        procs = [Process(p.pid, p.arrival, p.burst, p.priority) for p in self.processes]
+        procs = [Process(p.pid, p.arrival, p.burst) for p in self.processes]
         if algo == "FCFS":
             result, gantt = fcfs(procs)
         elif algo == "SJF":
