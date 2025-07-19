@@ -351,27 +351,30 @@ class CPUSchedulerGUI:
         # Metrics and status
         metrics_frame = tk.Frame(self.root, bg="#1A1A1A", highlightbackground="#FF1493", highlightthickness=2)
         metrics_frame.place(x=580, y=35, width=670, height=470)
-        tk.Label(metrics_frame, text="✿ Process", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=10, y=5)
-        tk.Label(metrics_frame, text="✿ Status", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=90, y=5)
-        tk.Label(metrics_frame, text="✿ Completion %", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=160, y=5)
-        tk.Label(metrics_frame, text="✿ Remaining", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=275, y=5)
-        tk.Label(metrics_frame, text="✿ Waiting", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=380, y=5)
-        tk.Label(metrics_frame, text="✿ Response", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=460, y=5)
-        tk.Label(metrics_frame, text="✿ Turnaround", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=550, y=5)
-        col_widths = [60, 60, 80, 60, 60, 60, 70]
+        # Improved spacing for metrics/status table
+        col_widths = [90, 90, 120, 90, 90, 110, 120]  # wider columns
         col_positions = []
-        current_pos = 10
+        current_pos = 20  # more left margin
         for width in col_widths:
             col_positions.append(current_pos)
-            current_pos += width
+            current_pos += width + 10  # add 10px gap between columns
+     
+        # Place headers with new positions and widths
+        headers = [
+            "✿ Process", "✿ Status", "✿ Completion %", "✿ Remaining",
+            "✿ Waiting", "✿ Response", "✿ Turnaround"
+        ]
+        for idx, header in enumerate(headers):
+            tk.Label(metrics_frame, text=header, bg="#1A1A1A", fg="#FF69B4", font=("Arial", 10, "bold")).place(
+                x=col_positions[idx], y=8, width=col_widths[idx], height=28)
 
         self.status_labels = []
         for i in range(10):
             row = []
             for j in range(len(col_widths)):
                 bg_color = "#252525" if i % 2 == 1 else "#1A1A1A"  # alternating row color
-                lbl = tk.Label(metrics_frame, text="", bg=bg_color, fg="#FF8DC7", anchor="center", font=("Arial", 8))
-                lbl.place(x=col_positions[j], y=30 + i * 25, width=col_widths[j], height=22)
+                lbl = tk.Label(metrics_frame, text="", bg=bg_color, fg="#FF8DC7", anchor="center", font=("Arial", 10))
+                lbl.place(x=col_positions[j], y=45 + i * 32, width=col_widths[j], height=28)
                 row.append(lbl)
             self.status_labels.append(row)
 
