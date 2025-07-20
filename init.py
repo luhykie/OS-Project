@@ -9,19 +9,18 @@ import time
 # -----------------------------
 
 class Process:
-    # Represents a process in the scheduler
     def __init__(self, pid, arrival, burst, priority=0):
-        self.pid = pid # Process ID
-        self.arrival = arrival # Arrival Time 
-        self.burst = burst # Total Execution Time
-        self.priority = priority # Priority Value
-        self.remaining = burst # Remaining Time Left to Execute (preemptive)
-        self.completion = 0 # Time pf which Process Completes
-        self.turnaround = 0 # Turnaround Time = Completion - Arrival
-        self.waiting = 0 # Waiting Time = Turnaround - Burst
-        self.response = -1 # Response Time = First Run - Arrival
-        self.start = -1 # First Run
-        self.queue_level = 0  # For MLFQ
+        self.pid = pid
+        self.arrival = arrival
+        self.burst = burst
+        self.priority = priority
+        self.remaining = burst
+        self.completion = 0
+        self.turnaround = 0
+        self.waiting = 0
+        self.response = -1
+        self.start = -1
+        self.queue_level = 0
 
     def as_dict(self):
         return {
@@ -34,18 +33,16 @@ class Process:
             'Waiting': self.waiting,
             'Response': self.response,
         }
-    
+
 # -----------------------------
 # Scheduling Algorithms
 # -----------------------------
+
 def fcfs(processes):
-    # First-Come, First-Served scheduling
-    # print(processes)
     procs = sorted(processes, key=lambda p: (p.arrival, p.pid))
     time = 0
     gantt = []
     for p in procs:
-        # Wait for process to arrive if CPU is idle
         if time < p.arrival:
             gantt.append(('IDLE', p.arrival - time))
             time = p.arrival
@@ -58,9 +55,8 @@ def fcfs(processes):
         time = p.completion
         gantt.append((p.pid, p.burst))
     return procs, gantt
-    
+
 def sjf(processes):
-    # Shortest Job First (non-preemptive) scheduling
     procs = [Process(p.pid, p.arrival, p.burst, p.priority) for p in processes]
     n = len(procs)
     time = 0
@@ -96,7 +92,6 @@ def sjf(processes):
     return procs, gantt
 
 def srtf(processes):
-    # Shortest Remaining Time First (preemptive SJF) scheduling
     procs = [Process(p.pid, p.arrival, p.burst, p.priority) for p in processes]
     n = len(procs)
     time = 0
@@ -109,7 +104,7 @@ def srtf(processes):
         while idx < n and procs[idx].arrival <= time:
             ready.append(procs[idx])
             idx += 1
-        ready = [p for p in ready if p.remaining > 0]
+        ready = [p for p in ready if p.remaining > 0 and p.arrival <= time]
         if ready:
             ready.sort(key=lambda p: (p.remaining, p.arrival, p.pid))
             p = ready[0]
@@ -138,7 +133,7 @@ def srtf(processes):
     return procs, gantt
 
 def round_robin(processes, quantum):
-    # Round Robin scheduling with given time quantum
+    # True round robin: always process the ready queue in order, handle arrivals and completions correctly
     procs = [Process(p.pid, p.arrival, p.burst, p.priority) for p in processes]
     n = len(procs)
     time = 0
@@ -149,13 +144,15 @@ def round_robin(processes, quantum):
     last_pid = None
     in_queue = set()
     while completed < n:
+        # Add all processes that have arrived by current time to the queue (if not already queued and not finished)
         while idx < n and procs[idx].arrival <= time:
-            queue.append(procs[idx])
-            in_queue.add(procs[idx].pid)
+            if procs[idx].remaining > 0 and procs[idx].pid not in in_queue:
+                queue.append(procs[idx])
+                in_queue.add(procs[idx].pid)
             idx += 1
         if queue:
             p = queue.pop(0)
-            in_queue.remove(p.pid)
+            in_queue.discard(p.pid)
             if p.start == -1:
                 p.start = time
                 p.response = time - p.arrival
@@ -166,14 +163,15 @@ def round_robin(processes, quantum):
                 gantt[-1] = (p.pid, gantt[-1][1] + run_time)
             time += run_time
             p.remaining -= run_time
-            while idx < n and procs[idx].arrival <= time:
-                if procs[idx].pid not in in_queue and procs[idx].remaining > 0:
-                    queue.append(procs[idx])
-                    in_queue.add(procs[idx].pid)
-                idx += 1
+            # Add any new arrivals during this time slice
+            for i in range(idx, n):
+                if procs[i].arrival > time - run_time and procs[i].arrival <= time and procs[i].remaining > 0 and procs[i].pid not in in_queue:
+                    queue.append(procs[i])
+                    in_queue.add(procs[i].pid)
             if p.remaining > 0:
-                queue.append(p)
-                in_queue.add(p.pid)
+                if p.pid not in in_queue:
+                    queue.append(p)
+                    in_queue.add(p.pid)
             else:
                 p.completion = time
                 p.turnaround = p.completion - p.arrival
@@ -181,6 +179,7 @@ def round_robin(processes, quantum):
                 completed += 1
             last_pid = p.pid
         else:
+            # If no process is ready, jump to the next arrival
             if idx < n:
                 next_arrival = procs[idx].arrival
                 idle_time = next_arrival - time
@@ -190,8 +189,6 @@ def round_robin(processes, quantum):
     return procs, gantt
 
 def mlfq(processes, quanta, allotments):
-    # Multilevel Feedback Queue scheduling with 4 queues
-    # 4 queues: Q0 (highest) to Q3 (lowest)
     procs = [Process(p.pid, p.arrival, p.burst, p.priority) for p in processes]
     n = len(procs)
     time = 0
@@ -201,7 +198,6 @@ def mlfq(processes, quanta, allotments):
     gantt = []
     last_pid = None
     in_queue = set()
-    # For each process, track time spent at each level
     level_time = {p.pid: [0, 0, 0, 0] for p in procs}
     while completed < n:
         while idx < n and procs[idx].arrival <= time:
@@ -209,11 +205,10 @@ def mlfq(processes, quanta, allotments):
             in_queue.add(procs[idx].pid)
             procs[idx].queue_level = 0
             idx += 1
-        # Find the highest non-empty queue
         qidx = next((i for i, q in enumerate(queues) if q), None)
         if qidx is not None:
             p = queues[qidx].pop(0)
-            in_queue.remove(p.pid)
+            in_queue.discard(p.pid)
             quantum = quanta[qidx]
             allot = allotments[qidx]
             run_time = min(quantum, p.remaining, allot - level_time[p.pid][qidx])
@@ -227,7 +222,6 @@ def mlfq(processes, quanta, allotments):
             time += run_time
             p.remaining -= run_time
             level_time[p.pid][qidx] += run_time
-            # Add new arrivals during this run
             while idx < n and procs[idx].arrival <= time:
                 queues[0].append(procs[idx])
                 in_queue.add(procs[idx].pid)
@@ -239,7 +233,6 @@ def mlfq(processes, quanta, allotments):
                 p.waiting = p.turnaround - p.burst
                 completed += 1
             elif level_time[p.pid][qidx] >= allot:
-                # Demote to next queue
                 if qidx < 3:
                     p.queue_level = qidx + 1
                     queues[qidx + 1].append(p)
@@ -261,6 +254,7 @@ def mlfq(processes, quanta, allotments):
                 last_pid = None
     return procs, gantt
 
+
 # -----------------------------
 # GUI Application
 # -----------------------------
@@ -270,12 +264,12 @@ class CPUSchedulerGUI:
         # Initialize the GUI and variables
         self.root = root
         self.root.title("OS: CPU Scheduler")
-        self.root.configure(bg="#1A1A1A")  # Black background
+        self.root.configure(bg="#f5d8ac")  # Frame background
         self.root.geometry("1370x700")  # Set window size
         self.root.resizable(False, False) # Disable resizing
         self.processes = [] # List to hold Process objects
         self.selected_algorithm = tk.StringVar() # Selected scheduling algorithm
-        self.quantum = tk.IntVar(value=1) # Time quantum for Round Robin
+        self.quantum = tk.IntVar(value=1) # Time quantum for Round6 Robin
         self.sim_speed = tk.DoubleVar(value=0.1) # Simulation speed
         self.mlfq_quanta = [tk.IntVar(value=v) for v in [2, 4, 8, 16]] # Quanta for MLFQ queues
         self.mlfq_allot = [tk.IntVar(value=4) for _ in range(4)] # Allotment for MLFQ queues
@@ -288,25 +282,31 @@ class CPUSchedulerGUI:
     def _build_gui(self):
         # Build all GUI components and layout
         # Top bar
-        tk.Label(self.root, text="☆彡 Developed by: LYKA ENTERA & KEA ABAQUITA ミ★", bg="#FF1493", fg="white", anchor="w", font=("Arial", 10, "bold")).place(x=0, y=0, relwidth=1, height=25)
+        tk.Label(self.root, text=" Developed by: LYKA ENTERA & KEA ABAQUITA ", bg="#a73f32", fg="#ffeece", anchor="w", font=("Arial", 10, "bold")).place(x=0, y=0, relwidth=1, height=25)
 
         # Process input frame
-        frame = tk.Frame(self.root, bg="#1A1A1A", highlightbackground="#FF1493", highlightthickness=2)
+        frame = tk.Frame(self.root, bg="#a94134", highlightbackground="#e6b887", highlightthickness=2)
         frame.place(x=10, y=35, width=635, height=120)
-        tk.Label(frame, text="✧ Process", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=4, y=5)
-        tk.Label(frame, text="✧ Arrival Time", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=100, y=5)
-        tk.Label(frame, text="✧ Burst Time", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=203, y=5)
+        tk.Label(frame, text="✧ Process", bg="#a94134", fg="#fff7d7", font=("Arial", 11)).place(x=4, y=5)
+        tk.Label(frame, text="✧ Arrival Time", bg="#a94134", fg="#fff7d7", font=("Arial", 11)).place(x=100, y=5)
+        tk.Label(frame, text="✧ Burst Time", bg="#a94134", fg="#fff7d7", font=("Arial", 11)).place(x=203, y=5)
         # Removed Priority label and entry
-        self.pid_entry = ttk.Combobox(frame, values=[f"P{i+1}" for i in range(20)], width=5)
+        style = ttk.Style()
+        style.theme_use('default')
+        style.configure("Treeview", background="#aa4235", fieldbackground="#fff7d7", foreground="#fff0d9", rowheight=24, font=("Arial", 8))
+        style.map('Treeview', background=[('selected', '#a94134')])
+        style.configure("Treeview.Heading", background="#aa4235", foreground="#042C10", font=("Arial", 9, "bold"))
+        style.configure("TCombobox", fieldbackground="#e5b786", background="#e5b786", foreground="#042C10")
+        self.pid_entry = ttk.Combobox(frame, values=[f"P{i+1}" for i in range(20)], width=5, style="TCombobox")
         self.pid_entry.place(x=10, y=30)
-        self.arrival_entry = tk.Entry(frame, width=8, bg="#2A2A2A", fg="#FF69B4")
+        self.arrival_entry = tk.Entry(frame, width=8, bg="#e5b786", fg="#042C10")
         self.arrival_entry.place(x=120, y=30)
-        self.burst_entry = tk.Entry(frame, width=8, bg="#2A2A2A", fg="#FF69B4")
+        self.burst_entry = tk.Entry(frame, width=8, bg="#e5b786", fg="#042C10")
         self.burst_entry.place(x=220, y=30)
         # Removed Priority entry
-        tk.Button(frame, text="Add ♡", command=self.add_process, width=6, bg="#FF1493", fg="white", font=("Arial", 8)).place(x=300, y=28)
-        tk.Button(frame, text="Generate Random ✩", command=self.generate_random, width=18, bg="#FF1493", fg="white", font=("Arial", 8)).place(x=10, y=70)
-        tk.Button(frame, text="Clear All ♪", command=self.clear_processes, width=10, bg="#FF1493", fg="white", font=("Arial", 8)).place(x=140, y=70)
+        tk.Button(frame, text="Add ♡", command=self.add_process, width=6, bg="#a73f32", fg="#fff0d9", font=("Arial", 8)).place(x=300, y=28)
+        tk.Button(frame, text="Generate Random ✩", command=self.generate_random, width=18, bg="#a73f32", fg="#fff0d9", highlightbackground="#e6b887", highlightthickness=2, font=("Arial", 10)).place(x=10, y=70)
+        tk.Button(frame, text="Clear All ", command=self.clear_processes, width=10, bg="#a73f32", fg="#fff0d9", highlightbackground="#e6b887", highlightthickness=2, font=("Arial", 10)).place(x=180, y=70)
 
         # Process table
         self.table = ttk.Treeview(self.root, columns=("PID", "Arrival", "Burst", "Response", "Turnaround"), show="headings", height=5)
@@ -314,47 +314,45 @@ class CPUSchedulerGUI:
         for col, width in zip(("PID", "Arrival", "Burst", "Response", "Turnaround"), (80, 80, 80, 100, 120)):
             self.table.heading(col, text=col)
             self.table.column(col, width=width, anchor="center")
-        style = ttk.Style()
-        style.configure("Treeview", background="#2A2A2A", fieldbackground="#2A2A2A", foreground="#FF69B4", rowheight=24, font=("Arial", 8))
-        style.map('Treeview', background=[('selected', '#FF1493')])
+        # Treeview and Combobox style already set above
 
         # Algorithm selection
-        algo_frame = tk.Frame(self.root, bg="#1A1A1A", highlightbackground="#FF1493", highlightthickness=2)
+        algo_frame = tk.Frame(self.root, bg="#aa4235", highlightbackground="#fffee1", highlightthickness=2)
         algo_frame.place(x=10, y=290, width=635, height=70)
-        tk.Label(algo_frame, text="♪ Algorithm", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=10, y=5)
+        tk.Label(algo_frame, text=" Algorithm", bg="#aa4235", fg="#fffee1", font=("Arial", 9)).place(x=10, y=5)
         algo_menu = ttk.Combobox(algo_frame, textvariable=self.selected_algorithm, values=["FCFS", "SJF", "SRTF", "Round Robin", "MLFQ"], state="readonly", width=15)
         algo_menu.place(x=10, y=30)
         algo_menu.current(0)
-        tk.Label(algo_frame, text="♫ Time Quantum (RR)", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=180, y=5)
-        tk.Scale(algo_frame, from_=1, to=10, orient=tk.HORIZONTAL, variable=self.quantum, length=120, bg="#1A1A1A", fg="#FF69B4", highlightthickness=0, troughcolor="#2A2A2A").place(x=180, y=30)
+        tk.Label(algo_frame, text=" Time Quantum (RR)", bg="#aa4235", fg="#fffee1", font=("Arial", 9)).place(x=180, y=5)
+        tk.Scale(algo_frame, from_=1, to=10, orient=tk.HORIZONTAL, variable=self.quantum, length=120, bg="#e7b787", fg="#a43c2f", highlightthickness=0, troughcolor="#e7b787").place(x=180, y=30)
         # MLFQ settings
-        tk.Label(algo_frame, text="✰ MLFQ Quanta", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=340, y=5)
+        tk.Label(algo_frame, text=" MLFQ Quanta", bg="#aa4235", fg="#fffee1", font=("Arial", 9)).place(x=340, y=5)
         for i in range(4):
-            tk.Entry(algo_frame, textvariable=self.mlfq_quanta[i], width=2, bg="#2A2A2A", fg="#FF69B4").place(x=320+40*i, y=30, width=20) 
+            tk.Entry(algo_frame, textvariable=self.mlfq_quanta[i], width=2, bg="#e7b787", fg="#a43c2f").place(x=320+40*i, y=30, width=20) 
         # Allot label in same style/format as Quanta
-        tk.Label(algo_frame, text="✰ MLFQ Allot", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=500, y=5)
+        tk.Label(algo_frame, text=" MLFQ Allot", bg="#a43c2f", fg="#fffee1", font=("Arial", 9)).place(x=500, y=5)
         # Allot entry boxes horizontally aligned like Quanta
         for i in range(4):
-            tk.Entry(algo_frame, textvariable=self.mlfq_allot[i], width=2, bg="#2A2A2A", fg="#FF69B4").place(x=470+40*i, y=30, width=20)
+            tk.Entry(algo_frame, textvariable=self.mlfq_allot[i], width=2, bg="#e7b787", fg="#a43c2f").place(x=470+40*i, y=30, width=20)
 
         # Action message
-        tk.Label(self.root, textvariable=self.action_msg, bg="#1A1A1A", fg="#FF69B4", font=("Arial", 10, "bold")).place(x=10, y=365, width=540, height=25)
+        tk.Label(self.root, textvariable=self.action_msg, bg="#a43c2f", fg="#fff2cd", font=("Arial", 10, "bold")).place(x=10, y=365, width=635, height=25)
 
         # Simulation controls
-        sim_frame = tk.Frame(self.root, bg="#1A1A1A", highlightbackground="#FF1493", highlightthickness=2)
+        sim_frame = tk.Frame(self.root, bg="#a43c2f", highlightbackground="#ffd3a8", highlightthickness=2)
         sim_frame.place(x=10, y=400, width=635, height=70)
-        tk.Label(sim_frame, text="✧ Simulation Speed ✧", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=10, y=5)
-        tk.Scale(sim_frame, from_=0.05, to=1.0, resolution=0.05, orient=tk.HORIZONTAL, variable=self.sim_speed, length=200, bg="#1A1A1A", fg="#FF69B4", highlightthickness=0, troughcolor="#2A2A2A").place(x=10, y=30)
-        tk.Button(sim_frame, text="★ Simulate ★", command=self.start_simulation, width=12, bg="#FF1493", fg="white", font=("Arial", 9)).place(x=250, y=20)
-        tk.Button(sim_frame, text="✩ Reset All ✩", command=self.reset_all, width=12, bg="#FF1493", fg="white", font=("Arial", 9)).place(x=370, y=20)
+        tk.Label(sim_frame, text="✧ Simulation Speed ✧", bg="#a43c2f", fg="#fff2cd", font=("Arial", 9)).place(x=10, y=5)
+        tk.Scale(sim_frame, from_=0.05, to=1.0, resolution=0.05, orient=tk.HORIZONTAL, variable=self.sim_speed, length=200, bg="#e8ba89", fg="#a53d30", highlightthickness=0, troughcolor="#e8ba89").place(x=10, y=30)
+        tk.Button(sim_frame, text="★ Simulate ★", command=self.start_simulation, width=12, bg="#a53d30", fg="#ffeccd",highlightbackground="#fff9d8", highlightthickness=1, font=("Arial", 9)).place(x=250, y=20)
+        tk.Button(sim_frame, text="✩ Reset All ✩", command=self.reset_all, width=12, bg="#a53d30", fg="#ffeccd", highlightbackground="#fff9d8",  highlightthickness=1, font=("Arial", 9)).place(x=370, y=20)
 
         # Gantt chart
-        tk.Label(self.root, text="♡ Gantt Chart ♡ (Each box is one time unit)", bg="#1A1A1A", fg="#FF69B4", font=("Arial", 9)).place(x=10, y=480)
-        self.gantt_canvas = tk.Canvas(self.root, bg="#1A1A1A", highlightbackground="#FF1493", height=60, width=1335)
+        tk.Label(self.root, text="Gantt Chart  (Each box is one time unit)", bg="#a53d30", fg="#fff9d8", font=("Arial", )).place(x=10, y=480, width=635, height=25)
+        self.gantt_canvas = tk.Canvas(self.root, bg="#a53b2e", highlightbackground="#fff9d8", height=60, width=1335)
         self.gantt_canvas.place(x=10, y=510)
         
         # Metrics and status
-        metrics_frame = tk.Frame(self.root, bg="#1A1A1A", highlightbackground="#FF1493", highlightthickness=2)
+        metrics_frame = tk.Frame(self.root, bg="#cc6b4b", highlightbackground="#cc6b4b", highlightthickness=2)
         metrics_frame.place(x=650, y=35, width=700, height=470)
         # Improved spacing for metrics/status table
         col_widths = [70, 80, 110, 85, 90, 80, 100]  # wider columns
@@ -370,36 +368,36 @@ class CPUSchedulerGUI:
             "✿ Waiting", "✿ Response", "✿ Turnaround"
         ]
         for idx, header in enumerate(headers):
-            tk.Label(metrics_frame, text=header, bg="#1A1A1A", fg="#FF69B4", font=("Arial", 10, "bold")).place(
+            tk.Label(metrics_frame, text=header, bg="#cc6b4b", fg="#741408", font=("Arial", 10, "bold")).place(
                 x=col_positions[idx], y=8, width=col_widths[idx], height=28)
 
         self.status_labels = []
         for i in range(10):
             row = []
             for j in range(len(col_widths)):
-                bg_color = "#252525" if i % 2 == 1 else "#1A1A1A"  # alternating row color
-                lbl = tk.Label(metrics_frame, text="", bg=bg_color, fg="#FF8DC7", anchor="center", font=("Arial", 10))
+                bg_color = "#e4b685" if i % 2 == 1 else "#e4b685"  # alternating row color (IDLE bg, frame bg)
+                lbl = tk.Label(metrics_frame, text="", bg=bg_color, fg="#741408", anchor="center", font=("Arial", 10))
                 lbl.place(x=col_positions[j], y=45 + i * 32, width=col_widths[j], height=28)
                 row.append(lbl)
             self.status_labels.append(row)
 
         # Averages 
-        self.avg_waiting = tk.StringVar(value="★ Avg Wait: -- ★")
-        self.avg_turnaround = tk.StringVar(value="♡ Avg Turnaround: -- ♡")
-        self.avg_response = tk.StringVar(value="✿ Avg Response: -- ✿")
+        self.avg_waiting = tk.StringVar(value=" Avg Wait: -- ")
+        self.avg_turnaround = tk.StringVar(value=" Avg Turnaround: -- ")
+        self.avg_response = tk.StringVar(value=" Avg Response: -- ")
         
         # Create decorated frames for averages with pink background
-        avg_wait_frame = tk.Frame(self.root, bg="#FF69B4", highlightthickness=1, highlightbackground="#FF1493")
+        avg_wait_frame = tk.Frame(self.root, bg="#e49471", highlightthickness=1, highlightbackground="#a74132")
         avg_wait_frame.place(x=18, y=585, width=1335, height=25)
-        avg_turn_frame = tk.Frame(self.root, bg="#FF69B4", highlightthickness=1, highlightbackground="#FF1493")
+        avg_turn_frame = tk.Frame(self.root, bg="#dd8d6a", highlightthickness=1, highlightbackground="#a74132")
         avg_turn_frame.place(x=18, y=625, width=1335, height=25)
-        avg_resp_frame = tk.Frame(self.root, bg="#FF69B4", highlightthickness=1, highlightbackground="#FF1493")
+        avg_resp_frame = tk.Frame(self.root, bg="#dd8d6a", highlightthickness=1, highlightbackground="#a74132")
         avg_resp_frame.place(x=18, y=665, width=1335, height=25)
         
         # Place labels on colored frames
-        tk.Label(avg_wait_frame, textvariable=self.avg_waiting, bg="#FF69B4", fg="#FFD1E0", font=("Arial", 9, "bold")).pack(fill=tk.BOTH, expand=True)
-        tk.Label(avg_turn_frame, textvariable=self.avg_turnaround, bg="#FF69B4", fg="#FFD1E0", font=("Arial", 9, "bold")).pack(fill=tk.BOTH, expand=True)
-        tk.Label(avg_resp_frame, textvariable=self.avg_response, bg="#FF69B4", fg="#FFD1E0", font=("Arial", 9, "bold")).pack(fill=tk.BOTH, expand=True)
+        tk.Label(avg_wait_frame, textvariable=self.avg_waiting, bg="#e49471", fg="#8b2a21", font=("Arial", 9, "bold")).pack(fill=tk.BOTH, expand=True)
+        tk.Label(avg_turn_frame, textvariable=self.avg_turnaround, bg="#e49471", fg="#8b2a21", font=("Arial", 9, "bold")).pack(fill=tk.BOTH, expand=True)
+        tk.Label(avg_resp_frame, textvariable=self.avg_response, bg="#e49471", fg="#8b2a21", font=("Arial", 9, "bold")).pack(fill=tk.BOTH, expand=True)
 
     def add_process(self):
         # Add a process from user input to the process list
@@ -410,13 +408,13 @@ class CPUSchedulerGUI:
             # Removed priority input
             # Validate input values
             if burst <= 0:
-                self.action_msg.set("✘ Execution time must be greater than 0! ✘")
+                self.action_msg.set(" Execution time must be greater than 0! ")
                 return
         except ValueError:
-            self.action_msg.set("✘ Invalid input values! Please check! ✘")
+            self.action_msg.set(" Invalid input values! Please check! ")
             return
         if any(p.pid == pid for p in self.processes):
-            self.action_msg.set("✘ Duplicate PID detected! ✘")
+            self.action_msg.set(" Duplicate PID detected! ")
             return
         self.processes.append(Process(pid, arrival, burst))  # Removed priority
         self.refresh_table()
@@ -438,13 +436,13 @@ class CPUSchedulerGUI:
             burst = random.randint(1, 10)  # Ensure minimum burst time of 1
             self.processes.append(Process(pid, arrival, burst))  # Removed priority
         self.refresh_table()
-        self.action_msg.set("✧ Random processes generated!")
+        self.action_msg.set(" Random processes generated!")
 
     def clear_processes(self):
         # Remove all processes from the list
         self.processes.clear()
         self.refresh_table()
-        self.action_msg.set("✧ All processes cleared!")
+        self.action_msg.set(" All processes cleared!")
 
     def refresh_table(self):
         # Update the process table in the GUI
@@ -458,15 +456,15 @@ class CPUSchedulerGUI:
     def start_simulation(self):
         # Start the simulation in a separate thread
         if not self.processes:
-            self.action_msg.set("✘ No processes to simulate! Please add some! ✘")
+            self.action_msg.set(" No processes to simulate! Please add some! ")
             return
         if self.sim_running:
-            self.action_msg.set("✧ Simulation already running! Please wait~ ✧")
+            self.action_msg.set(" Simulation already running! Please wait~ ")
             return
             
         # Validate time quantum values
         if self.selected_algorithm.get() == "Round Robin" and self.quantum.get() <= 0:
-            self.action_msg.set("✘ Time quantum must be greater than 0! ✘")
+            self.action_msg.set(" Time quantum must be greater than 0! ")
             return
             
         # Validate MLFQ quanta and allotment values
@@ -488,7 +486,9 @@ class CPUSchedulerGUI:
     def simulate(self):
         # Run the selected scheduling algorithm and update the GUI
         algo = self.selected_algorithm.get()
-        procs = [Process(p.pid, p.arrival, p.burst) for p in self.processes]
+        # Always sort by arrival time to avoid idle at 0 unless all processes arrive after 0
+        sorted_processes = sorted(self.processes, key=lambda p: (p.arrival, p.pid))
+        procs = [Process(p.pid, p.arrival, p.burst) for p in sorted_processes]
         if algo == "FCFS":
             result, gantt = fcfs(procs)
         elif algo == "SJF":
@@ -512,16 +512,37 @@ class CPUSchedulerGUI:
         self.sim_running = False
 
     def update_gantt(self):
-        # Draw the Gantt chart on the canvas
+        # Draw the Gantt chart on the canvas with improved box sizes and time ticks
         self.gantt_canvas.delete("all")
-        x = 5
+        x = 10
         y = 10
-        h = 20
+        h = 30
+        # Calculate total duration to fit boxes to canvas width
+        total_time = sum(dur for _, dur in self.gantt_data)
+        canvas_width = int(self.gantt_canvas['width'])
+        min_box_width = 20
+        max_box_width = 60
+        if total_time > 0:
+            box_width = max(min_box_width, min(max_box_width, (canvas_width - 20) // total_time))
+        else:
+            box_width = min_box_width
+
+        # Draw Gantt chart bars
+        time_cursor = 0
+        x_cursor = x
         for label, dur in self.gantt_data:
-            color = "#FF1493" if label != "IDLE" else "#2A2A2A"
-            self.gantt_canvas.create_rectangle(x, y, x+dur*25, y+h, fill=color, outline="#FF69B4", width=1)
-            self.gantt_canvas.create_text(x+dur*12, y+h//2, text=str(label), fill="#FFFFFF", font=("Arial", 8, "bold"))
-            x += dur*25
+            color = "#df916b" if label != "IDLE" else "#a7b1b3"
+            w = dur * box_width
+            self.gantt_canvas.create_rectangle(x_cursor, y, x_cursor+w, y+h, fill=color, outline="#a63e31", width=1)
+            self.gantt_canvas.create_text(x_cursor+w//2, y+h//2, text=str(label), fill="#a63e31", font=("Arial", 8, "bold"))
+            x_cursor += w
+
+        # Draw time ticks and labels for every time slice
+        x_cursor = x
+        for t in range(total_time + 1):
+            self.gantt_canvas.create_line(x_cursor, y+h, x_cursor, y+h+8, fill="#658C72", width=1)
+            self.gantt_canvas.create_text(x_cursor, y+h+15, text=str(t), fill="#042C10", font=("Arial", 8))
+            x_cursor += box_width
 
     def update_status(self, procs):
         # Update the status table for each process
