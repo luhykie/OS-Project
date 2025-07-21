@@ -512,37 +512,66 @@ class CPUSchedulerGUI:
         self.sim_running = False
 
     def update_gantt(self):
-        # Draw the Gantt chart on the canvas with improved box sizes and time ticks
+        # Animate the Gantt chart so each box appears one by one
         self.gantt_canvas.delete("all")
-        x = 10
-        y = 10
-        h = 30
-        # Calculate total duration to fit boxes to canvas width
-        total_time = sum(dur for _, dur in self.gantt_data)
+        self._gantt_anim_x = 10
+        self._gantt_anim_y = 10
+        self._gantt_anim_h = 30
+        self._gantt_anim_idx = 0
+        self._gantt_anim_time_cursor = 0
+        self._gantt_anim_total_time = sum(dur for _, dur in self.gantt_data)
         canvas_width = int(self.gantt_canvas['width'])
         min_box_width = 20
         max_box_width = 60
-        if total_time > 0:
-            box_width = max(min_box_width, min(max_box_width, (canvas_width - 20) // total_time))
+        if self._gantt_anim_total_time > 0:
+            self._gantt_anim_box_width = max(min_box_width, min(max_box_width, (canvas_width - 20) // self._gantt_anim_total_time))
         else:
-            box_width = min_box_width
+            self._gantt_anim_box_width = min_box_width
+        self.disable_sim_controls()
+        self.animate_gantt()
 
-        # Draw Gantt chart bars
-        time_cursor = 0
-        x_cursor = x
-        for label, dur in self.gantt_data:
-            color = "#df916b" if label != "IDLE" else "#a7b1b3"
-            w = dur * box_width
-            self.gantt_canvas.create_rectangle(x_cursor, y, x_cursor+w, y+h, fill=color, outline="#a63e31", width=1)
-            self.gantt_canvas.create_text(x_cursor+w//2, y+h//2, text=str(label), fill="#a63e31", font=("Arial", 8, "bold"))
-            x_cursor += w
+    def animate_gantt(self):
+        # Draw one Gantt box per call, then schedule next
+        if self._gantt_anim_idx >= len(self.gantt_data):
+            # Draw time ticks and labels for every time slice
+            x_cursor = 10
+            y = self._gantt_anim_y
+            h = self._gantt_anim_h
+            for t in range(self._gantt_anim_total_time + 1):
+                self.gantt_canvas.create_line(x_cursor, y+h, x_cursor, y+h+8, fill="#658C72", width=1)
+                self.gantt_canvas.create_text(x_cursor, y+h+15, text=str(t), fill="#042C10", font=("Arial", 8))
+                x_cursor += self._gantt_anim_box_width
+            self.enable_sim_controls()
+            return
+        label, dur = self.gantt_data[self._gantt_anim_idx]
+        color = "#df916b" if label != "IDLE" else "#a7b1b3"
+        w = dur * self._gantt_anim_box_width
+        x = self._gantt_anim_x
+        y = self._gantt_anim_y
+        h = self._gantt_anim_h
+        self.gantt_canvas.create_rectangle(x, y, x+w, y+h, fill=color, outline="#a63e31", width=1)
+        self.gantt_canvas.create_text(x+w//2, y+h//2, text=str(label), fill="#a63e31", font=("Arial", 8, "bold"))
+        self._gantt_anim_x += w
+        self._gantt_anim_idx += 1
+        # Animation speed based on sim_speed (smaller is faster)
+        delay = int(self.sim_speed.get() * 400)
+        self.root.after(delay, self.animate_gantt)
 
-        # Draw time ticks and labels for every time slice
-        x_cursor = x
-        for t in range(total_time + 1):
-            self.gantt_canvas.create_line(x_cursor, y+h, x_cursor, y+h+8, fill="#658C72", width=1)
-            self.gantt_canvas.create_text(x_cursor, y+h+15, text=str(t), fill="#042C10", font=("Arial", 8))
-            x_cursor += box_width
+    def disable_sim_controls(self):
+        # Disable simulation controls during Gantt animation
+        for child in self.root.winfo_children():
+            if isinstance(child, tk.Frame):
+                for btn in child.winfo_children():
+                    if isinstance(btn, (tk.Button, ttk.Combobox, tk.Entry, tk.Scale)):
+                        btn.config(state="disabled")
+
+    def enable_sim_controls(self):
+        # Enable simulation controls after Gantt animation
+        for child in self.root.winfo_children():
+            if isinstance(child, tk.Frame):
+                for btn in child.winfo_children():
+                    if isinstance(btn, (tk.Button, ttk.Combobox, tk.Entry, tk.Scale)):
+                        btn.config(state="normal")
 
     def update_status(self, procs):
         # Update the status table for each process
