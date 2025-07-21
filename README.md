@@ -65,12 +65,12 @@ Developed by: **Lyka Entera & Kea Abaquita**
 
 
 ## Screenshots
-<img width="1711" height="912" alt="image" src="https://github.com/user-attachments/assets/66801abf-cd9a-4716-9a32-7c20dc0013b8" />
-<img width="1696" height="892" alt="image" src="https://github.com/user-attachments/assets/df101d48-d1dc-4465-b7d6-e0c66148639e" />
-<img width="1715" height="909" alt="image" src="https://github.com/user-attachments/assets/30b4957b-0ef5-4949-af68-a1eb7b767441" />
-<img width="1708" height="916" alt="image" src="https://github.com/user-attachments/assets/c7020523-b3ff-4fca-b83a-6e8a833f4e6a" />
-<img width="1701" height="903" alt="image" src="https://github.com/user-attachments/assets/44547c55-e854-4e89-a5d9-ecb758c6e1a0" />
-<img width="1706" height="899" alt="image" src="https://github.com/user-attachments/assets/caa05bae-abfb-4fab-8223-5b570bbea920" />
+<img width="1712" height="906" alt="image" src="https://github.com/user-attachments/assets/eaba41b8-5762-4d54-be92-f3466eb25206" />
+<img width="1705" height="909" alt="image" src="https://github.com/user-attachments/assets/0dc22ad8-44ee-4015-9dfe-480ed47f3663" />
+<img width="1702" height="903" alt="image" src="https://github.com/user-attachments/assets/d78f4931-0210-4c39-8de6-a24a69f9607c" />
+<img width="1703" height="899" alt="image" src="https://github.com/user-attachments/assets/e168a46d-0593-449d-9af5-795f634c4f6d" />
+<img width="1700" height="900" alt="image" src="https://github.com/user-attachments/assets/f6d88c3c-f3f1-4646-aab4-1af945744927" />
+<img width="1698" height="906" alt="image" src="https://github.com/user-attachments/assets/8b40a765-d8aa-4554-b80b-84cc02b4fb64" />
 
 
 ## Customization
@@ -102,6 +102,18 @@ If you want to create a standalone Windows executable:
 
 - Lyka Entera
 - Kea Abaquita
+
+Contributions
+- **Kea Abaquita**
+  - Implemented the FCFS and SJF scheduling algorithms.
+  - Developed the initial GUI layout and applied the custom warm color palette.
+  - Contributed to Gantt chart integration and status table layout.
+
+- **Lyka Entera**
+  - Implemented and debugged the SRTF, Round Robin, and MLFQ scheduling algorithms.
+  - Handled the majority of error checking, simulation fixes, and overall debugging.
+  - Developed process flow logic, thread handling, and metric computation.
+  - Refined the visual display, animation flow, and ensured simulation accuracy and stability.
 
 
 ## License
